@@ -1,0 +1,33 @@
+//
+//  CABitOperations.swift
+//  CAPlayThroughSwift
+//
+//  Created by Jasmin Lapalme on 15-12-30.
+//  Copyright © 2016 jPense. All rights reserved.
+//
+
+import Foundation
+
+func CountLeadingZeroes(var x: UInt32) -> UInt32 {
+	var n : UInt32 = 32;
+	var y : UInt32;
+	
+	y = x >> 16; if (y != 0) { n = n - 16; x = y; }
+	y = x >> 8; if (y != 0) { n = n - 8; x = y; }
+	y = x >> 4; if (y != 0) { n = n - 4; x = y; }
+	y = x >> 2; if (y != 0) { n = n - 2; x = y; }
+	y = x >> 1; if (y != 0) { return n - 2; }
+	
+	return n - x;
+}
+
+// base 2 log of next power of two greater or equal to x
+func Log2Ceil(x: UInt32) -> UInt32
+{
+	return 32 - CountLeadingZeroes(x - 1);
+}
+
+func NextPowerOfTwo(x: UInt32) -> UInt32
+{
+	return 1 << Log2Ceil(x);
+}

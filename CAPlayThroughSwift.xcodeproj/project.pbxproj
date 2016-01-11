@@ -1,0 +1,301 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		DA79DE891C3339DC00B6ED9A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA79DE881C3339DC00B6ED9A /* AppDelegate.swift */; };
+		DA79DE8B1C3339DC00B6ED9A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DA79DE8A1C3339DC00B6ED9A /* Assets.xcassets */; };
+		DA79DE8E1C3339DC00B6ED9A /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = DA79DE8C1C3339DC00B6ED9A /* MainMenu.xib */; };
+		DA79DE961C342F0E00B6ED9A /* AudioDeviceList.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA79DE951C342F0E00B6ED9A /* AudioDeviceList.swift */; };
+		DA79DE981C34328A00B6ED9A /* CheckErr.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA79DE971C34328A00B6ED9A /* CheckErr.swift */; };
+		DA79DE9A1C343E9D00B6ED9A /* AudioDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA79DE991C343E9D00B6ED9A /* AudioDevice.swift */; };
+		DA79DE9E1C346FEB00B6ED9A /* CARingBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA79DE9D1C346FEB00B6ED9A /* CARingBuffer.swift */; };
+		DA79DEA01C34965200B6ED9A /* CABitOperations.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA79DE9F1C34965200B6ED9A /* CABitOperations.swift */; };
+		DABFCAF61C39E52500C82F20 /* CAPlayThrough.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA79DE9B1C34690B00B6ED9A /* CAPlayThrough.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		DA79DE851C3339DC00B6ED9A /* CAPlayThroughSwift.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CAPlayThroughSwift.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DA79DE881C3339DC00B6ED9A /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		DA79DE8A1C3339DC00B6ED9A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		DA79DE8D1C3339DC00B6ED9A /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
+		DA79DE8F1C3339DC00B6ED9A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		DA79DE951C342F0E00B6ED9A /* AudioDeviceList.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AudioDeviceList.swift; sourceTree = "<group>"; };
+		DA79DE971C34328A00B6ED9A /* CheckErr.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CheckErr.swift; sourceTree = "<group>"; };
+		DA79DE991C343E9D00B6ED9A /* AudioDevice.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AudioDevice.swift; sourceTree = "<group>"; };
+		DA79DE9B1C34690B00B6ED9A /* CAPlayThrough.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CAPlayThrough.swift; sourceTree = "<group>"; };
+		DA79DE9D1C346FEB00B6ED9A /* CARingBuffer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CARingBuffer.swift; sourceTree = "<group>"; wrapsLines = 0; };
+		DA79DE9F1C34965200B6ED9A /* CABitOperations.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CABitOperations.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		DA79DE821C3339DC00B6ED9A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		DA79DE7C1C3339DC00B6ED9A = {
+			isa = PBXGroup;
+			children = (
+				DA79DE871C3339DC00B6ED9A /* CAPlayThroughSwift */,
+				DA79DE861C3339DC00B6ED9A /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		DA79DE861C3339DC00B6ED9A /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				DA79DE851C3339DC00B6ED9A /* CAPlayThroughSwift.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		DA79DE871C3339DC00B6ED9A /* CAPlayThroughSwift */ = {
+			isa = PBXGroup;
+			children = (
+				DA79DE881C3339DC00B6ED9A /* AppDelegate.swift */,
+				DA79DE951C342F0E00B6ED9A /* AudioDeviceList.swift */,
+				DA79DE991C343E9D00B6ED9A /* AudioDevice.swift */,
+				DA79DE971C34328A00B6ED9A /* CheckErr.swift */,
+				DA79DE9B1C34690B00B6ED9A /* CAPlayThrough.swift */,
+				DA79DE9D1C346FEB00B6ED9A /* CARingBuffer.swift */,
+				DA79DE9F1C34965200B6ED9A /* CABitOperations.swift */,
+				DA79DE8A1C3339DC00B6ED9A /* Assets.xcassets */,
+				DA79DE8C1C3339DC00B6ED9A /* MainMenu.xib */,
+				DA79DE8F1C3339DC00B6ED9A /* Info.plist */,
+			);
+			path = CAPlayThroughSwift;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		DA79DE841C3339DC00B6ED9A /* CAPlayThroughSwift */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DA79DE921C3339DC00B6ED9A /* Build configuration list for PBXNativeTarget "CAPlayThroughSwift" */;
+			buildPhases = (
+				DA79DE811C3339DC00B6ED9A /* Sources */,
+				DA79DE821C3339DC00B6ED9A /* Frameworks */,
+				DA79DE831C3339DC00B6ED9A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = CAPlayThroughSwift;
+			productName = CAPlayThroughSwift;
+			productReference = DA79DE851C3339DC00B6ED9A /* CAPlayThroughSwift.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		DA79DE7D1C3339DC00B6ED9A /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 0720;
+				LastUpgradeCheck = 0720;
+				ORGANIZATIONNAME = jPense;
+				TargetAttributes = {
+					DA79DE841C3339DC00B6ED9A = {
+						CreatedOnToolsVersion = 7.2;
+					};
+				};
+			};
+			buildConfigurationList = DA79DE801C3339DC00B6ED9A /* Build configuration list for PBXProject "CAPlayThroughSwift" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = DA79DE7C1C3339DC00B6ED9A;
+			productRefGroup = DA79DE861C3339DC00B6ED9A /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				DA79DE841C3339DC00B6ED9A /* CAPlayThroughSwift */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		DA79DE831C3339DC00B6ED9A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DA79DE8B1C3339DC00B6ED9A /* Assets.xcassets in Resources */,
+				DA79DE8E1C3339DC00B6ED9A /* MainMenu.xib in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		DA79DE811C3339DC00B6ED9A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DA79DE981C34328A00B6ED9A /* CheckErr.swift in Sources */,
+				DA79DE961C342F0E00B6ED9A /* AudioDeviceList.swift in Sources */,
+				DA79DE9A1C343E9D00B6ED9A /* AudioDevice.swift in Sources */,
+				DABFCAF61C39E52500C82F20 /* CAPlayThrough.swift in Sources */,
+				DA79DEA01C34965200B6ED9A /* CABitOperations.swift in Sources */,
+				DA79DE9E1C346FEB00B6ED9A /* CARingBuffer.swift in Sources */,
+				DA79DE891C3339DC00B6ED9A /* AppDelegate.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		DA79DE8C1C3339DC00B6ED9A /* MainMenu.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				DA79DE8D1C3339DC00B6ED9A /* Base */,
+			);
+			name = MainMenu.xib;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		DA79DE901C3339DC00B6ED9A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		DA79DE911C3339DC00B6ED9A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		DA79DE931C3339DC00B6ED9A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = CAPlayThroughSwift/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = net.jpense.CAPlayThroughSwift;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		DA79DE941C3339DC00B6ED9A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = CAPlayThroughSwift/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = net.jpense.CAPlayThroughSwift;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		DA79DE801C3339DC00B6ED9A /* Build configuration list for PBXProject "CAPlayThroughSwift" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DA79DE901C3339DC00B6ED9A /* Debug */,
+				DA79DE911C3339DC00B6ED9A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		DA79DE921C3339DC00B6ED9A /* Build configuration list for PBXNativeTarget "CAPlayThroughSwift" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DA79DE931C3339DC00B6ED9A /* Debug */,
+				DA79DE941C3339DC00B6ED9A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = DA79DE7D1C3339DC00B6ED9A /* Project object */;
+}
