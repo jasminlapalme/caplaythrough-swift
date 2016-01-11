@@ -2,7 +2,7 @@
 
 Swift version of the CAPlayThrough example provided by Apple. (https://developer.apple.com/library/mac/samplecode/CAPlayThrough/Introduction/Intro.html)
 
-## description
+## Description
 
 Here is the description provided in the example by Apple.
 
