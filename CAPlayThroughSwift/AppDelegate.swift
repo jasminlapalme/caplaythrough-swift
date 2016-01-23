@@ -17,6 +17,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 	@IBOutlet weak var outputDeviceController: NSArrayController!
 	@IBOutlet weak var stopStartButton: NSButton!
 	@IBOutlet weak var progress: NSProgressIndicator!
+	@IBOutlet weak var fftView: FFTView!;
 	
 	var inputDeviceList: AudioDeviceList;
 	var outputDeviceList: AudioDeviceList;
@@ -67,6 +68,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 		self.selectedOutputDevice = self.outputDeviceList.devices.filter({ return $0.id == outputDevice }).first
 
 		playThroughHost = CAPlayThroughHost(input: inputDevice,output: outputDevice);
+		self.fftView.playThroughHost = playThroughHost;
 	}
 
 	func applicationDidFinishLaunching(aNotification: NSNotification) {

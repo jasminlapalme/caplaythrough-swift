@@ -16,6 +16,7 @@
         <arrayController id="OhK-Jb-Nn6" userLabel="Output device controller"/>
         <customObject id="Voe-Tx-rLC" customClass="AppDelegate" customModule="CAPlayThroughSwift" customModuleProvider="target">
             <connections>
+                <outlet property="fftView" destination="dKS-Yw-gIQ" id="hsH-Uk-XHm"/>
                 <outlet property="inputDeviceController" destination="VCl-ga-sRz" id="YG7-Z8-8GD"/>
                 <outlet property="outputDeviceController" destination="OhK-Jb-Nn6" id="G85-mC-l1f"/>
                 <outlet property="progress" destination="ZSt-Mz-igW" id="2vQ-8a-b0b"/>
@@ -676,14 +677,14 @@
         <window title="CAPlayThrough - Swift" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" animationBehavior="default" id="QvC-M9-y7g">
             <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
-            <rect key="contentRect" x="335" y="390" width="480" height="127"/>
+            <rect key="contentRect" x="335" y="390" width="480" height="227"/>
             <rect key="screenRect" x="0.0" y="0.0" width="1680" height="1027"/>
             <view key="contentView" id="EiT-Mj-1SZ">
-                <rect key="frame" x="0.0" y="0.0" width="480" height="127"/>
+                <rect key="frame" x="0.0" y="0.0" width="480" height="227"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <popUpButton verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="QAA-hn-gFl">
-                        <rect key="frame" x="18" y="58" width="215" height="26"/>
+                        <rect key="frame" x="18" y="158" width="215" height="26"/>
                         <popUpButtonCell key="cell" type="push" title="Item 1" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="YR5-Jj-i2x" id="two-47-4Yr">
                             <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="menu"/>
@@ -703,7 +704,7 @@
                         </connections>
                     </popUpButton>
                     <popUpButton verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="YR3-Ac-G5G">
-                        <rect key="frame" x="248" y="58" width="215" height="26"/>
+                        <rect key="frame" x="248" y="158" width="215" height="26"/>
                         <popUpButtonCell key="cell" type="push" title="Item 1" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="vLa-Xf-tYW" id="mwn-bO-vog">
                             <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="menu"/>
@@ -736,7 +737,7 @@
                         <rect key="frame" x="378" y="23" width="16" height="16"/>
                     </progressIndicator>
                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="tcR-jT-CRb">
-                        <rect key="frame" x="18" y="90" width="214" height="17"/>
+                        <rect key="frame" x="18" y="190" width="214" height="17"/>
                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Input device" id="b5a-4u-nWV">
                             <font key="font" metaFont="system"/>
                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -744,27 +745,33 @@
                         </textFieldCell>
                     </textField>
                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="FjI-CW-d5f">
-                        <rect key="frame" x="248" y="90" width="214" height="17"/>
+                        <rect key="frame" x="248" y="190" width="214" height="17"/>
                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Output device" id="ZPz-8O-yEx">
                             <font key="font" metaFont="system"/>
                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
                     </textField>
+                    <customView verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="dKS-Yw-gIQ" customClass="FFTView" customModule="CAPlayThroughSwift" customModuleProvider="target">
+                        <rect key="frame" x="20" y="49" width="440" height="104"/>
+                    </customView>
                 </subviews>
                 <constraints>
                     <constraint firstItem="YR3-Ac-G5G" firstAttribute="leading" secondItem="QAA-hn-gFl" secondAttribute="trailing" constant="20" id="5Nj-3y-Bom"/>
                     <constraint firstItem="YR3-Ac-G5G" firstAttribute="leading" secondItem="FjI-CW-d5f" secondAttribute="leading" id="6j2-4E-2S1"/>
                     <constraint firstItem="YR3-Ac-G5G" firstAttribute="trailing" secondItem="FjI-CW-d5f" secondAttribute="trailing" id="Ky7-t6-XRC"/>
                     <constraint firstAttribute="trailing" secondItem="YR3-Ac-G5G" secondAttribute="trailing" constant="20" id="MFp-Dc-6wo"/>
-                    <constraint firstItem="sZ3-L0-Fr3" firstAttribute="top" secondItem="YR3-Ac-G5G" secondAttribute="bottom" constant="20" id="MyV-qH-DvR"/>
+                    <constraint firstAttribute="trailing" secondItem="dKS-Yw-gIQ" secondAttribute="trailing" constant="20" id="NrE-aT-uEG"/>
                     <constraint firstItem="FjI-CW-d5f" firstAttribute="top" secondItem="EiT-Mj-1SZ" secondAttribute="top" constant="20" id="PqA-pX-Bqo"/>
+                    <constraint firstItem="dKS-Yw-gIQ" firstAttribute="leading" secondItem="EiT-Mj-1SZ" secondAttribute="leading" constant="20" id="PqD-59-Y5y"/>
                     <constraint firstItem="QAA-hn-gFl" firstAttribute="width" secondItem="YR3-Ac-G5G" secondAttribute="width" id="S1Y-wf-7l4"/>
                     <constraint firstItem="YR3-Ac-G5G" firstAttribute="top" secondItem="FjI-CW-d5f" secondAttribute="bottom" constant="8" id="U1Y-3e-zLa"/>
                     <constraint firstItem="QAA-hn-gFl" firstAttribute="leading" secondItem="tcR-jT-CRb" secondAttribute="leading" id="Wjo-Jn-uzR"/>
                     <constraint firstItem="QAA-hn-gFl" firstAttribute="top" secondItem="tcR-jT-CRb" secondAttribute="bottom" constant="8" id="WuK-Wi-nao"/>
+                    <constraint firstItem="sZ3-L0-Fr3" firstAttribute="top" secondItem="dKS-Yw-gIQ" secondAttribute="bottom" constant="8" id="aNX-XY-agI"/>
                     <constraint firstItem="sZ3-L0-Fr3" firstAttribute="leading" secondItem="ZSt-Mz-igW" secondAttribute="trailing" constant="8" id="d4P-xr-MHn"/>
                     <constraint firstItem="sZ3-L0-Fr3" firstAttribute="centerY" secondItem="ZSt-Mz-igW" secondAttribute="centerY" id="gE6-Pu-tLF"/>
+                    <constraint firstItem="dKS-Yw-gIQ" firstAttribute="top" secondItem="YR3-Ac-G5G" secondAttribute="bottom" constant="8" id="lcs-wt-Wki"/>
                     <constraint firstItem="QAA-hn-gFl" firstAttribute="trailing" secondItem="tcR-jT-CRb" secondAttribute="trailing" id="nLj-Rp-dfC"/>
                     <constraint firstItem="QAA-hn-gFl" firstAttribute="leading" secondItem="EiT-Mj-1SZ" secondAttribute="leading" constant="20" id="oD7-QW-o04"/>
                     <constraint firstAttribute="trailing" secondItem="sZ3-L0-Fr3" secondAttribute="trailing" constant="20" id="suG-Sf-zmt"/>

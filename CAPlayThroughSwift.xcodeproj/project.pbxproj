@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		DA07D77B1C4B1705002333F5 /* FFTHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA07D77A1C4B1705002333F5 /* FFTHelper.swift */; };
+		DA07D77D1C4B3BE7002333F5 /* BufferManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA07D77C1C4B3BE6002333F5 /* BufferManager.swift */; };
+		DA07D77F1C4B4DCD002333F5 /* FFTView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA07D77E1C4B4DCD002333F5 /* FFTView.swift */; };
+		DA07D7811C4DE0E7002333F5 /* DCRejectionFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA07D7801C4DE0E7002333F5 /* DCRejectionFilter.swift */; };
 		DA79DE891C3339DC00B6ED9A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA79DE881C3339DC00B6ED9A /* AppDelegate.swift */; };
 		DA79DE8B1C3339DC00B6ED9A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DA79DE8A1C3339DC00B6ED9A /* Assets.xcassets */; };
 		DA79DE8E1C3339DC00B6ED9A /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = DA79DE8C1C3339DC00B6ED9A /* MainMenu.xib */; };
@@ -15,10 +19,15 @@
 		DA79DE9A1C343E9D00B6ED9A /* AudioDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA79DE991C343E9D00B6ED9A /* AudioDevice.swift */; };
 		DA79DE9E1C346FEB00B6ED9A /* CARingBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA79DE9D1C346FEB00B6ED9A /* CARingBuffer.swift */; };
 		DA79DEA01C34965200B6ED9A /* CABitOperations.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA79DE9F1C34965200B6ED9A /* CABitOperations.swift */; };
+		DA8521BA1C5412B30035477E /* MathFunctions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA8521B91C5412B30035477E /* MathFunctions.swift */; };
 		DABFCAF61C39E52500C82F20 /* CAPlayThrough.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA79DE9B1C34690B00B6ED9A /* CAPlayThrough.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		DA07D77A1C4B1705002333F5 /* FFTHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FFTHelper.swift; sourceTree = "<group>"; };
+		DA07D77C1C4B3BE6002333F5 /* BufferManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BufferManager.swift; sourceTree = "<group>"; };
+		DA07D77E1C4B4DCD002333F5 /* FFTView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FFTView.swift; sourceTree = "<group>"; };
+		DA07D7801C4DE0E7002333F5 /* DCRejectionFilter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DCRejectionFilter.swift; sourceTree = "<group>"; };
 		DA79DE851C3339DC00B6ED9A /* CAPlayThroughSwift.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CAPlayThroughSwift.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DA79DE881C3339DC00B6ED9A /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		DA79DE8A1C3339DC00B6ED9A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -30,6 +39,7 @@
 		DA79DE9B1C34690B00B6ED9A /* CAPlayThrough.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CAPlayThrough.swift; sourceTree = "<group>"; };
 		DA79DE9D1C346FEB00B6ED9A /* CARingBuffer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CARingBuffer.swift; sourceTree = "<group>"; wrapsLines = 0; };
 		DA79DE9F1C34965200B6ED9A /* CABitOperations.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CABitOperations.swift; sourceTree = "<group>"; };
+		DA8521B91C5412B30035477E /* MathFunctions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MathFunctions.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -69,6 +79,11 @@
 				DA79DE9B1C34690B00B6ED9A /* CAPlayThrough.swift */,
 				DA79DE9D1C346FEB00B6ED9A /* CARingBuffer.swift */,
 				DA79DE9F1C34965200B6ED9A /* CABitOperations.swift */,
+				DA07D77A1C4B1705002333F5 /* FFTHelper.swift */,
+				DA07D77C1C4B3BE6002333F5 /* BufferManager.swift */,
+				DA07D77E1C4B4DCD002333F5 /* FFTView.swift */,
+				DA07D7801C4DE0E7002333F5 /* DCRejectionFilter.swift */,
+				DA8521B91C5412B30035477E /* MathFunctions.swift */,
 				DA79DE8A1C3339DC00B6ED9A /* Assets.xcassets */,
 				DA79DE8C1C3339DC00B6ED9A /* MainMenu.xib */,
 				DA79DE8F1C3339DC00B6ED9A /* Info.plist */,
@@ -147,8 +162,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				DA79DE981C34328A00B6ED9A /* CheckErr.swift in Sources */,
+				DA07D7811C4DE0E7002333F5 /* DCRejectionFilter.swift in Sources */,
+				DA07D77F1C4B4DCD002333F5 /* FFTView.swift in Sources */,
 				DA79DE961C342F0E00B6ED9A /* AudioDeviceList.swift in Sources */,
+				DA07D77B1C4B1705002333F5 /* FFTHelper.swift in Sources */,
+				DA8521BA1C5412B30035477E /* MathFunctions.swift in Sources */,
 				DA79DE9A1C343E9D00B6ED9A /* AudioDevice.swift in Sources */,
+				DA07D77D1C4B3BE7002333F5 /* BufferManager.swift in Sources */,
 				DABFCAF61C39E52500C82F20 /* CAPlayThrough.swift in Sources */,
 				DA79DEA01C34965200B6ED9A /* CABitOperations.swift in Sources */,
 				DA79DE9E1C346FEB00B6ED9A /* CARingBuffer.swift in Sources */,
