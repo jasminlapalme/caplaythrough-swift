@@ -11,6 +11,17 @@ import AudioUnit;
 import CoreAudio;
 import AudioToolbox;
 
+func mergeAudioBufferList(abl: UnsafeMutableAudioBufferListPointer, inNumberFrames: UInt32) -> [Float] {
+	let umpab = abl.map({ return UnsafeMutablePointer<Float32>($0.mData) })
+	var b = Array<Float>(count: Int(inNumberFrames), repeatedValue: 0);
+	for (i, _) in b.enumerate() {
+		b[i] = umpab.reduce(Float(0), combine: { (f: Float, ab: UnsafeMutablePointer<Float32>) -> Float in
+			return f + ab[i];
+		})
+	}
+	return b;
+}
+
 func inputProc(inRefCon: UnsafeMutablePointer<Void>, ioActionFlags: UnsafeMutablePointer<AudioUnitRenderActionFlags>, inTimeStamp: UnsafePointer<AudioTimeStamp>, inBusNumber: UInt32, inNumberFrames: UInt32, ioData: UnsafeMutablePointer<AudioBufferList>) -> OSStatus
 {
 	let This = Unmanaged<CAPlayThrough>.fromOpaque(COpaquePointer(inRefCon)).takeUnretainedValue()
@@ -21,6 +32,13 @@ func inputProc(inRefCon: UnsafeMutablePointer<Void>, ioActionFlags: UnsafeMutabl
 	// Get the new audio data
 	if let err = checkErr(AudioUnitRender(This.inputUnit, ioActionFlags, inTimeStamp, inBusNumber, inNumberFrames, This.inputBuffer.unsafeMutablePointer)) {
 		return err;
+	}
+	
+	var samples = mergeAudioBufferList(This.inputBuffer, inNumberFrames: inNumberFrames);
+	
+	if (This.bufferManager.needsNewFFTData > 0) {
+		This.dcRejectionFilter.processInplace(&samples);
+		This.bufferManager.copyAudioDataToFFTInputBuffer(samples);
 	}
 	
 	let ringBufferErr = This.buffer.store(This.inputBuffer, framesToWrite: inNumberFrames, startWrite: CARingBuffer.SampleTime(inTimeStamp.memory.mSampleTime))
@@ -104,6 +122,8 @@ class CAPlayThrough
 	var outputDevice: AudioDevice!;
 	
 	var buffer = CARingBuffer();
+	var bufferManager: BufferManager!;
+	var dcRejectionFilter: DCRejectionFilter!;
 	
 	//AudioUnits and Graph
 	var graph: AUGraph = nil;
@@ -162,9 +182,6 @@ class CAPlayThrough
 		stop();
 		
 		if inputBuffer.unsafePointer != nil {
-			for buffer in inputBuffer {
-				free(buffer.mData);
-			}
 			free(inputBuffer.unsafeMutablePointer)
 		}
 	}
@@ -444,6 +461,20 @@ class CAPlayThrough
 	
 	func callbackSetup() -> OSStatus
 	{
+		var maxFramesPerSlice: UInt32 = 4096;
+
+		if let err = checkErr(AudioUnitSetProperty(inputUnit, kAudioUnitProperty_MaximumFramesPerSlice, kAudioUnitScope_Global, 0, &maxFramesPerSlice, UInt32(sizeof(UInt32)))) {
+			return err;
+		}
+		
+		var propSize = UInt32(sizeof(UInt32));
+		if let err = checkErr(AudioUnitGetProperty(inputUnit, kAudioUnitProperty_MaximumFramesPerSlice, kAudioUnitScope_Global, 0, &maxFramesPerSlice, &propSize)) {
+			return err;
+		}
+		
+		bufferManager = BufferManager(inMaxFramesPerSlice: Int(maxFramesPerSlice));
+		dcRejectionFilter = DCRejectionFilter();
+		
 		var input = AURenderCallbackStruct(
 			inputProc: inputProc,
 			inputProcRefCon: UnsafeMutablePointer<Void>(Unmanaged<CAPlayThrough>.passUnretained(self).toOpaque())
@@ -557,7 +588,6 @@ class CAPlayThrough
 		for var buf in inputBuffer {
 			buf.mNumberChannels = 1;
 			buf.mDataByteSize = bufferSizeBytes;
-			buf.mData = malloc(Int(bufferSizeBytes));
 		}
 		
 		//Alloc ring buffer that will hold data between the two audio devices
@@ -568,7 +598,7 @@ class CAPlayThrough
 	}
 
 	func computeThruOffset() {
-		//The initial latency will at least be the saftey offset's of the devices + the buffer sizes
+		//The initial latency will at least be the safety offset's of the devices + the buffer sizes
 		inToOutSampleOffset = Float64(inputDevice.safetyOffset + inputDevice.bufferSizeFrames + outputDevice.safetyOffset + outputDevice.bufferSizeFrames);
 	}
 }
