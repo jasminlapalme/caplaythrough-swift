@@ -22,12 +22,10 @@ func CountLeadingZeroes(var x: UInt32) -> UInt32 {
 }
 
 // base 2 log of next power of two greater or equal to x
-func Log2Ceil(x: UInt32) -> UInt32
-{
+func Log2Ceil(x: UInt32) -> UInt32 {
 	return 32 - CountLeadingZeroes(x - 1);
 }
 
-func NextPowerOfTwo(x: UInt32) -> UInt32
-{
+func NextPowerOfTwo(x: UInt32) -> UInt32 {
 	return 1 << Log2Ceil(x);
 }

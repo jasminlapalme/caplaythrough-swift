@@ -25,9 +25,8 @@ class BufferManager {
 	}
 	
 	func fftOutputBufferLength() -> Int { return fftInputBufferLen / 2; }
-
-	func copyAudioDataToFFTInputBuffer(inData: [Float])
-	{
+	
+	func copyAudioDataToFFTInputBuffer(inData: [Float]) {
 		let framesToCopy = min(inData.count, fftInputBufferLen - fftInputBuffer.count);
 		fftInputBuffer.appendContentsOf(inData.prefix(framesToCopy));
 		if (fftInputBuffer.count >= fftInputBufferLen) {
@@ -36,8 +35,7 @@ class BufferManager {
 		}
 	}
 	
-	func fftOutput() -> [Float]
-	{
+	func fftOutput() -> [Float] {
 		let outFFTData = fftHelper.computeFFT(fftInputBuffer);
 		fftInputBuffer.removeAll();
 		OSAtomicDecrement32Barrier(&hasNewFFTData);

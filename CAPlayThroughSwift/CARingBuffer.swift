@@ -40,8 +40,7 @@ func ZeroRange(buffers: [ [UInt8] ], offset: Int, nbytes: Int) {
 	}
 }
 
-func StoreABL(inout buffers: [ [UInt8] ], destOffset: Int, abl: UnsafeMutableAudioBufferListPointer, srcOffset: Int,
-							nbytes: Int) {
+func StoreABL(inout buffers: [ [UInt8] ], destOffset: Int, abl: UnsafeMutableAudioBufferListPointer, srcOffset: Int, nbytes: Int) {
 	for (i, src) in abl.enumerate() {
 		if (srcOffset > Int(src.mDataByteSize)) {
 			continue;
@@ -54,15 +53,14 @@ func StoreABL(inout buffers: [ [UInt8] ], destOffset: Int, abl: UnsafeMutableAud
 	}
 }
 
-func FetchABL(abl: UnsafeMutableAudioBufferListPointer, destOffset: Int, buffers: [ [UInt8] ],
-							srcOffset: Int, nbytes: Int) {
+func FetchABL(abl: UnsafeMutableAudioBufferListPointer, destOffset: Int, buffers: [ [UInt8] ], srcOffset: Int, nbytes: Int) {
 	for (dest, var b) in zip(abl, buffers) {
 		if (destOffset > Int(dest.mDataByteSize)) {
 			continue;
 		}
 		let count = min(nbytes, Int(dest.mDataByteSize) - destOffset);
 		let d = UnsafeMutableBufferPointer<UInt8>(start: UnsafeMutablePointer<UInt8>(dest.mData),
-																							count: Int(dest.mDataByteSize));
+			count: Int(dest.mDataByteSize));
 		for j in 0..<count {
 			d[destOffset + j] = b[srcOffset + j];
 		}
@@ -88,10 +86,10 @@ class CARingBuffer {
 	var capacityFrames: UInt32 = 0;
 	var capacityFramesMask: UInt32 = 0;
 	var capacityBytes: UInt32 = 0;
-
+	
 	var timeBoundsQueue : [TimeBounds] = []; // kGeneralRingTimeBoundsQueueSize
 	var timeBoundsQueuePtr : Int32 = 0;
-
+	
 	func allocate(nChannels: Int, bytesPerFrame: UInt32, capacityFrames: UInt32) {
 		self.bytesPerFrame = bytesPerFrame;
 		self.capacityFrames = NextPowerOfTwo(capacityFrames);
@@ -116,11 +114,11 @@ class CARingBuffer {
 	func endTime() -> SampleTime {
 		return self.timeBoundsQueue[Int(self.timeBoundsQueuePtr & kGeneralRingTimeBoundsQueueMask)].endTime;
 	}
-
+	
 	func frameOffset(frameNumber: SampleTime) -> Int {
 		return Int((frameNumber & SampleTime(self.capacityFramesMask)) * SampleTime(self.bytesPerFrame));
 	}
-
+	
 	func setTimeBounds(startTime: SampleTime, _ endTime: SampleTime) {
 		let nextPtr = self.timeBoundsQueuePtr + 1;
 		let index = Int(nextPtr & kGeneralRingTimeBoundsQueueMask);
@@ -133,7 +131,7 @@ class CARingBuffer {
 			OSAtomicCompareAndSwap32Barrier(Int32(self.timeBoundsQueuePtr), Int32(self.timeBoundsQueuePtr + 1), ptr);
 		}
 	}
-
+	
 	func store(abl: UnsafeMutableAudioBufferListPointer, framesToWrite: UInt32, startWrite: SampleTime) -> CARingBufferError {
 		if framesToWrite == 0 {
 			return CARingBufferError.OK;
@@ -190,7 +188,7 @@ class CARingBuffer {
 		
 		return CARingBufferError.OK;	// success
 	}
-
+	
 	func getTimeBounds(inout startTime startTime: SampleTime, inout endTime: SampleTime) -> CARingBufferError {
 		for _ in 0...8 {
 			let curPtr = self.timeBoundsQueuePtr;
@@ -205,30 +203,29 @@ class CARingBuffer {
 		}
 		return CARingBufferError.CPUOverload;
 	}
-
+	
 	func clipTimeBounds(inout startRead startRead: SampleTime, inout endRead: SampleTime) -> CARingBufferError {
 		var startTime: SampleTime = 0;
 		var endTime: SampleTime = 0;
 		let err = getTimeBounds(startTime: &startTime, endTime: &endTime)
-	
+		
 		if err != CARingBufferError.OK {
 			return err;
 		}
-	
+		
 		if (startRead > endTime || endRead < startTime) {
 			endRead = startRead;
 			return CARingBufferError.OK;
 		}
-	
+		
 		startRead = max(startRead, startTime);
 		endRead = min(endRead, endTime);
 		endRead = max(endRead, startRead);
-	
+		
 		return CARingBufferError.OK;	// success
 	}
-
-	func fetch(abl: UnsafeMutableAudioBufferListPointer, nFrames: UInt32, var startRead: SampleTime) -> CARingBufferError
-	{
+	
+	func fetch(abl: UnsafeMutableAudioBufferListPointer, nFrames: UInt32, var startRead: SampleTime) -> CARingBufferError {
 		if (nFrames == 0) {
 			return CARingBufferError.OK;
 		}

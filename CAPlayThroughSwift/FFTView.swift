@@ -12,7 +12,7 @@ class FFTView: NSView {
 	let kNumber = 20;
 	var timer: NSTimer!;
 	var playThroughHost: CAPlayThroughHost!;
-
+	
 	required init?(coder: NSCoder) {
 		timer = nil;
 		super.init(coder: coder);
@@ -42,20 +42,17 @@ class FFTView: NSView {
 			var fftIdx_i : Float = 0;
 			var fftIdx_f : Float = 0;
 			fftIdx_f = modff(fftIdx, &fftIdx_i);
-
+			
 			let lowerIndex = Int(fftIdx_i);
 			var upperIndex = Int(fftIdx_i + 1);
 			upperIndex = (upperIndex == outFFTData.count) ? outFFTData.count - 1 : upperIndex;
-
+			
 			let fft_l_fl = Float((outFFTData[lowerIndex] + 80) / 64.0);
 			let fft_r_fl = Float((outFFTData[upperIndex] + 80) / 64.0);
 			let interpVal = fft_l_fl * (1.0 - fftIdx_f) + fft_r_fl * fftIdx_f;
 			
 			fftDraw.append(clamp(min: Float(0.0), x: interpVal, max: Float(1.0)));
 		}
-//		let max_value = max(fftDraw, min: 0);
-//		let fftDrawNorm = fftDraw.map({ $0 / max_value });
-		
 		return fftDraw;
 	}
 	

@@ -22,55 +22,55 @@ class AudioDevice {
 		self.safetyOffset = 0;
 		self.bufferSizeFrames = 0;
 		self.format = AudioStreamBasicDescription();
-
+		
 		if (self.id == kAudioDeviceUnknown) {
 			return;
 		}
-	
+		
 		var propsize = UInt32(sizeof(Float32));
-	
+		
 		let theScope = isInput ? kAudioDevicePropertyScopeInput : kAudioDevicePropertyScopeOutput;
-	
+		
 		var theAddress = AudioObjectPropertyAddress(
 			mSelector: kAudioDevicePropertySafetyOffset,
 			mScope: theScope,
 			mElement: 0
 		);
-	
+		
 		checkErr(AudioObjectGetPropertyData(self.id, &theAddress, 0, nil, &propsize, &safetyOffset));
-
+		
 		propsize = UInt32(sizeof(UInt32));
 		theAddress.mSelector = kAudioDevicePropertyBufferFrameSize;
-	
+		
 		checkErr(AudioObjectGetPropertyData(self.id, &theAddress, 0, nil, &propsize, &bufferSizeFrames));
-	
+		
 		propsize = UInt32(sizeof(AudioStreamBasicDescription));
 		theAddress.mSelector = kAudioDevicePropertyStreamFormat;
-	
+		
 		checkErr(AudioObjectGetPropertyData(self.id, &theAddress, 0, nil, &propsize, &format));
 	}
 	
 	func setBufferSize(var size: UInt32) {
 		var propsize = UInt32(sizeof(UInt32));
-	
+		
 		let theScope = isInput ? kAudioDevicePropertyScopeInput : kAudioDevicePropertyScopeOutput;
-	
+		
 		var theAddress = AudioObjectPropertyAddress(
 			mSelector: kAudioDevicePropertyBufferFrameSize,
 			mScope: theScope,
 			mElement: 0
 		);
-	
+		
 		checkErr(AudioObjectSetPropertyData(self.id, &theAddress, 0, nil, propsize, &size));
-	
+		
 		checkErr(AudioObjectGetPropertyData(self.id, &theAddress, 0, nil, &propsize, &bufferSizeFrames));
 	}
 	
 	func CountChannels() -> Int {
 		var result : Int = 0;
-	
+		
 		let theScope = isInput ? kAudioDevicePropertyScopeInput : kAudioDevicePropertyScopeOutput;
-	
+		
 		var theAddress = AudioObjectPropertyAddress(
 			mSelector: kAudioDevicePropertyStreamConfiguration,
 			mScope: theScope,
@@ -82,7 +82,7 @@ class AudioDevice {
 		if (err != noErr) {
 			return 0;
 		}
-	
+		
 		let bufList = AudioBufferList.allocate(maximumBuffers: Int(propSize));
 		err = AudioObjectGetPropertyData(self.id, &theAddress, 0, nil, &propSize, bufList.unsafeMutablePointer);
 		if (err == noErr) {

@@ -34,8 +34,7 @@ class FFTHelper {
 		dspSplitComplex.imagp.dealloc(Int(fftLength))
 	}
 	
-	func computeFFT(inAudioData: [Float]) -> [Float]
-	{
+	func computeFFT(inAudioData: [Float]) -> [Float] {
 		if (inAudioData.isEmpty) {
 			return [];
 		}

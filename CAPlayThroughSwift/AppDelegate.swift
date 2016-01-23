@@ -11,7 +11,7 @@ import CoreAudio
 
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate {
-
+	
 	@IBOutlet weak var window: NSWindow!
 	@IBOutlet weak var inputDeviceController: NSArrayController!
 	@IBOutlet weak var outputDeviceController: NSArrayController!
@@ -66,19 +66,19 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 		
 		self.selectedInputDevice = self.inputDeviceList.devices.filter({ return $0.id == inputDevice }).first
 		self.selectedOutputDevice = self.outputDeviceList.devices.filter({ return $0.id == outputDevice }).first
-
+		
 		playThroughHost = CAPlayThroughHost(input: inputDevice,output: outputDevice);
 		self.fftView.playThroughHost = playThroughHost;
 	}
-
+	
 	func applicationDidFinishLaunching(aNotification: NSNotification) {
 		// Insert code here to initialize your application
 	}
-
+	
 	func applicationWillTerminate(aNotification: NSNotification) {
 		// Insert code here to tear down your application
 	}
-
+	
 	func start() {
 		if playThroughHost.isRunning() {
 			return;
@@ -105,7 +105,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 		}
 		playThroughHost.createPlayThrough(inputDevice, outputDevice);
 	}
-
+	
 	@IBAction func startStop(sender: NSButton) {
 		if !playThroughHost.playThroughExists() {
 			self.playThroughHost.createPlayThrough(inputDevice, outputDevice);
@@ -117,12 +117,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 			stop();
 		}
 	}
-
+	
 	@IBAction func inputDeviceSelected(sender: NSPopUpButton) {
 		if (selectedInputDevice.id == inputDevice) {
 			return;
 		}
-
+		
 		stop();
 		inputDevice = selectedInputDevice.id;
 		resetPlayThrough();
@@ -132,7 +132,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 		if (selectedOutputDevice.id == outputDevice) {
 			return;
 		}
-
+		
 		stop();
 		outputDevice = selectedOutputDevice.id;
 		resetPlayThrough();
