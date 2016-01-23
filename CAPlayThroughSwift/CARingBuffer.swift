@@ -46,11 +46,11 @@ func StoreABL(inout buffers: [ [UInt8] ], destOffset: Int, abl: UnsafeMutableAud
 		if (srcOffset > Int(src.mDataByteSize)) {
 			continue;
 		}
-		
-		buffers[i].withUnsafeMutableBufferPointer({ (inout buffer: UnsafeMutableBufferPointer<UInt8>) -> () in
-			let s = UnsafeMutablePointer<UInt8>(src.mData);
-			memcpy(buffer.baseAddress + destOffset, s + srcOffset, min(nbytes, Int(src.mDataByteSize) - srcOffset));
-		});
+		let count = min(nbytes, Int(src.mDataByteSize) - srcOffset);
+		let s = UnsafeBufferPointer<UInt8>(start: UnsafePointer<UInt8>(src.mData), count: Int(src.mDataByteSize));
+		for j in 0..<count {
+			buffers[i][destOffset + j] = s[srcOffset + j];
+		}
 	}
 }
 
@@ -60,10 +60,12 @@ func FetchABL(abl: UnsafeMutableAudioBufferListPointer, destOffset: Int, buffers
 		if (destOffset > Int(dest.mDataByteSize)) {
 			continue;
 		}
-		b.withUnsafeMutableBufferPointer({ (inout buffer: UnsafeMutableBufferPointer<UInt8>) -> () in
-			let d = UnsafeMutablePointer<UInt8>(dest.mData);
-			memcpy(d + destOffset, buffer.baseAddress + srcOffset, min(nbytes, Int(dest.mDataByteSize) - destOffset))
-		})
+		let count = min(nbytes, Int(dest.mDataByteSize) - destOffset);
+		let d = UnsafeMutableBufferPointer<UInt8>(start: UnsafeMutablePointer<UInt8>(dest.mData),
+																							count: Int(dest.mDataByteSize));
+		for j in 0..<count {
+			d[destOffset + j] = b[srcOffset + j];
+		}
 	}
 }
 
