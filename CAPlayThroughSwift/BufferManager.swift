@@ -14,9 +14,11 @@ class BufferManager {
 	var needsNewFFTData: Int32;
 	var hasNewFFTData: Int32;
 	let fftInputBufferLen: Int;
+	let sampleRate: Float64;
 	
-	init(inMaxFramesPerSlice: Int) {
+	init(inMaxFramesPerSlice: Int, sampleRate: Float64) {
 		fftInputBufferLen = inMaxFramesPerSlice;
+		self.sampleRate = sampleRate;
 		fftInputBuffer = [];
 		fftHelper = FFTHelper(inMaxFramesPerSlice: inMaxFramesPerSlice);
 		needsNewFFTData = 0;

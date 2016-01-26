@@ -447,20 +447,6 @@ class CAPlayThrough {
 	}
 	
 	func callbackSetup() -> OSStatus {
-		var maxFramesPerSlice: UInt32 = 4096;
-		
-		if let err = checkErr(AudioUnitSetProperty(inputUnit, kAudioUnitProperty_MaximumFramesPerSlice, kAudioUnitScope_Global, 0, &maxFramesPerSlice, UInt32(sizeof(UInt32)))) {
-			return err;
-		}
-		
-		var propSize = UInt32(sizeof(UInt32));
-		if let err = checkErr(AudioUnitGetProperty(inputUnit, kAudioUnitProperty_MaximumFramesPerSlice, kAudioUnitScope_Global, 0, &maxFramesPerSlice, &propSize)) {
-			return err;
-		}
-		
-		bufferManager = BufferManager(inMaxFramesPerSlice: Int(maxFramesPerSlice));
-		dcRejectionFilter = DCRejectionFilter();
-		
 		var input = AURenderCallbackStruct(
 			inputProc: inputProc,
 			inputProcRefCon: UnsafeMutablePointer<Void>(Unmanaged<CAPlayThrough>.passUnretained(self).toOpaque())
@@ -537,6 +523,20 @@ class CAPlayThrough {
 			return err;
 		}
 		
+		var maxFramesPerSlice: UInt32 = 4096;
+		
+		if let err = checkErr(AudioUnitSetProperty(inputUnit, kAudioUnitProperty_MaximumFramesPerSlice, kAudioUnitScope_Global, 0, &maxFramesPerSlice, UInt32(sizeof(UInt32)))) {
+			return err;
+		}
+		
+		var propSize = UInt32(sizeof(UInt32));
+		if let err = checkErr(AudioUnitGetProperty(inputUnit, kAudioUnitProperty_MaximumFramesPerSlice, kAudioUnitScope_Global, 0, &maxFramesPerSlice, &propSize)) {
+			return err;
+		}
+		
+		bufferManager = BufferManager(inMaxFramesPerSlice: Int(maxFramesPerSlice), sampleRate: rate);
+		dcRejectionFilter = DCRejectionFilter();
+
 		asbd.mSampleRate = rate;
 		propertySize = UInt32(sizeof(AudioStreamBasicDescription));
 		

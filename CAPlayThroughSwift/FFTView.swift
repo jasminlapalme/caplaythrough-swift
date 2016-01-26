@@ -9,11 +9,23 @@
 import AppKit
 
 class FFTView: NSView {
-	let kNumber = 20;
+	let kNumberBars = 40;
+	
+	let kMinFrequency = 40;
+	let kMaxFrequency = 20000;
+	
+	let kExpFuncBase: Double;
+	let kExpFuncConstant: Double;
+	
 	var timer: NSTimer!;
 	var playThroughHost: CAPlayThroughHost!;
 	
 	required init?(coder: NSCoder) {
+		// Calculate the a (kExpFuncBase) and b (kExpFuncConstant) of a quadratic function (ax^2 + b) so that
+		// f(0) = kMinFrequency and f(kNumberBars) = kMaxFrequency
+		kExpFuncBase = Double(kMaxFrequency - kMinFrequency) / (pow(Double(kNumberBars), 2));
+		kExpFuncConstant = Double(kMinFrequency);
+		
 		timer = nil;
 		super.init(coder: coder);
 		self.canDrawConcurrently = true;
@@ -32,12 +44,15 @@ class FFTView: NSView {
 		if (self.playThroughHost.playThrough.bufferManager.hasNewFFTData == 0) {
 			return fftDraw;
 		}
-		let outFFTData = self.playThroughHost.playThrough.bufferManager.fftOutput();
+		let bufferManager = self.playThroughHost.playThrough.bufferManager;
+		let outFFTData = bufferManager.fftOutput();
 		if outFFTData.isEmpty {
 			return fftDraw;
 		}
-		for k in 0...kNumber-1 {
-			let yFract = Float(k) / Float(kNumber - 1);
+		for k in 0..<kNumberBars {
+			let targetFreq = kExpFuncBase * pow(Double(k), 2) + kExpFuncConstant;
+			let yFract = Float(targetFreq) / (Float(bufferManager.sampleRate));
+			
 			let fftIdx = yFract * Float(outFFTData.count - 1);
 			var fftIdx_i : Float = 0;
 			var fftIdx_f : Float = 0;
@@ -57,21 +72,23 @@ class FFTView: NSView {
 	}
 	
 	override func drawRect(dirtyRect: NSRect) {
-		let colWidth = (NSWidth(self.bounds) - 1.0) / CGFloat(kNumber);
+		let colWidth = (NSWidth(self.bounds) - 1.0) / CGFloat(kNumberBars);
 		let colMaxHeight = NSHeight(self.bounds);
 		let margin = colWidth / 6;
 		let fftDraw = fft();
 		if fftDraw.isEmpty {
 			return;
 		}
-		for k in 0...kNumber-1 {
+		
+		// Draw each bars
+		for k in 0..<kNumberBars {
 			let colHeight = CGFloat(fftDraw[k]) * colMaxHeight;
 			let path = NSBezierPath(rect: NSMakeRect(
 				colWidth * CGFloat(k) + margin, 0,
 				colWidth - margin, colHeight)
 			);
 			path.lineWidth = 1.0;
-			path.stroke();
+			path.fill();
 		}
 	}
 	
