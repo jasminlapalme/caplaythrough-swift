@@ -72,9 +72,14 @@ class FFTView: NSView {
 	}
 	
 	override func drawRect(dirtyRect: NSRect) {
-		let colWidth = (NSWidth(self.bounds) - 1.0) / CGFloat(kNumberBars);
+		NSColor.lightGrayColor().set();
+		let box = NSBezierPath(rect: self.bounds);
+		box.lineWidth = 1.0;
+		box.stroke();
+
+		let margin = CGFloat(2);
+		let colWidth = (NSWidth(self.bounds) - 2.0 * margin) / CGFloat(kNumberBars);
 		let colMaxHeight = NSHeight(self.bounds);
-		let margin = colWidth / 6;
 		let fftDraw = fft();
 		if fftDraw.isEmpty {
 			return;
@@ -84,9 +89,10 @@ class FFTView: NSView {
 		for k in 0..<kNumberBars {
 			let colHeight = CGFloat(fftDraw[k]) * colMaxHeight;
 			let path = NSBezierPath(rect: NSMakeRect(
-				colWidth * CGFloat(k) + margin, 0,
+				colWidth * CGFloat(k) + 2 * margin, 0,
 				colWidth - margin, colHeight)
 			);
+			NSColor.darkGrayColor().set();
 			path.lineWidth = 1.0;
 			path.fill();
 		}
