@@ -33,7 +33,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 	}
 	
 	override func awakeFromNib() {
-		var propsize = UInt32(sizeof(AudioDeviceID));
+		var propsize = UInt32(MemoryLayout<AudioDeviceID>.size);
 		
 		var theAddress = AudioObjectPropertyAddress(
 			mSelector: kAudioHardwarePropertyDefaultInputDevice,
@@ -50,7 +50,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 			&inputDevice)
 		);
 		
-		propsize = UInt32(sizeof(AudioDeviceID));
+		propsize = UInt32(MemoryLayout<AudioDeviceID>.size);
 		theAddress.mSelector = kAudioHardwarePropertyDefaultOutputDevice;
 		checkErr(AudioObjectGetPropertyData(
 			AudioObjectID(kAudioObjectSystemObject),
@@ -71,11 +71,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 		self.fftView.playThroughHost = playThroughHost;
 	}
 	
-	func applicationDidFinishLaunching(aNotification: NSNotification) {
+	func applicationDidFinishLaunching(_ aNotification: Notification) {
 		// Insert code here to initialize your application
 	}
 	
-	func applicationWillTerminate(aNotification: NSNotification) {
+	func applicationWillTerminate(_ aNotification: Notification) {
 		// Insert code here to tear down your application
 	}
 	
@@ -85,7 +85,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 		}
 		stopStartButton.title = "Stop";
 		playThroughHost.start();
-		progress.hidden = false;
+		progress.isHidden = false;
 		progress.startAnimation(self);
 	}
 	
@@ -95,7 +95,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 		}
 		stopStartButton.title = "Start";
 		playThroughHost.stop();
-		progress.hidden = true;
+		progress.isHidden = true;
 		progress.stopAnimation(self);
 	}
 	
@@ -106,7 +106,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 		playThroughHost.createPlayThrough(inputDevice, outputDevice);
 	}
 	
-	@IBAction func startStop(sender: NSButton) {
+	@IBAction func startStop(_ sender: NSButton) {
 		if !playThroughHost.playThroughExists() {
 			self.playThroughHost.createPlayThrough(inputDevice, outputDevice);
 		}
@@ -118,7 +118,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 		}
 	}
 	
-	@IBAction func inputDeviceSelected(sender: NSPopUpButton) {
+	@IBAction func inputDeviceSelected(_ sender: NSPopUpButton) {
 		if (selectedInputDevice.id == inputDevice) {
 			return;
 		}
@@ -128,7 +128,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 		resetPlayThrough();
 	}
 	
-	@IBAction func outputDeviceSelected(sender: NSPopUpButton) {
+	@IBAction func outputDeviceSelected(_ sender: NSPopUpButton) {
 		if (selectedOutputDevice.id == outputDevice) {
 			return;
 		}

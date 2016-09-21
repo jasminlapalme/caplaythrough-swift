@@ -27,7 +27,7 @@ class AudioDevice {
 			return;
 		}
 		
-		var propsize = UInt32(sizeof(Float32));
+		var propsize = UInt32(MemoryLayout<Float32>.size);
 		
 		let theScope = isInput ? kAudioDevicePropertyScopeInput : kAudioDevicePropertyScopeOutput;
 		
@@ -39,19 +39,20 @@ class AudioDevice {
 		
 		checkErr(AudioObjectGetPropertyData(self.id, &theAddress, 0, nil, &propsize, &safetyOffset));
 		
-		propsize = UInt32(sizeof(UInt32));
+		propsize = UInt32(MemoryLayout<UInt32>.size);
 		theAddress.mSelector = kAudioDevicePropertyBufferFrameSize;
 		
 		checkErr(AudioObjectGetPropertyData(self.id, &theAddress, 0, nil, &propsize, &bufferSizeFrames));
 		
-		propsize = UInt32(sizeof(AudioStreamBasicDescription));
+		propsize = UInt32(MemoryLayout<AudioStreamBasicDescription>.size);
 		theAddress.mSelector = kAudioDevicePropertyStreamFormat;
 		
 		checkErr(AudioObjectGetPropertyData(self.id, &theAddress, 0, nil, &propsize, &format));
 	}
 	
-	func setBufferSize(var size: UInt32) {
-		var propsize = UInt32(sizeof(UInt32));
+	func setBufferSize(_ size: UInt32) {
+		var size = size
+		var propsize = UInt32(MemoryLayout<UInt32>.size);
 		
 		let theScope = isInput ? kAudioDevicePropertyScopeInput : kAudioDevicePropertyScopeOutput;
 		
@@ -86,7 +87,7 @@ class AudioDevice {
 		let bufList = AudioBufferList.allocate(maximumBuffers: Int(propSize));
 		err = AudioObjectGetPropertyData(self.id, &theAddress, 0, nil, &propSize, bufList.unsafeMutablePointer);
 		if (err == noErr) {
-			result = bufList.reduce(0, combine: { $0 + Int($1.mNumberChannels) });
+			result = bufList.reduce(0, { $0 + Int($1.mNumberChannels) });
 		}
 		free(bufList.unsafeMutablePointer);
 		return result;
@@ -101,9 +102,9 @@ class AudioDevice {
 		);
 		
 		var maxlen = UInt32(1024);
-		let buf = UnsafeMutablePointer<UInt8>.alloc(Int(maxlen));
+		let buf = UnsafeMutablePointer<UInt8>.allocate(capacity: Int(maxlen));
 		checkErr(AudioObjectGetPropertyData(self.id, &theAddress, 0, nil, &maxlen, buf));
-		if let str = String(bytesNoCopy: buf, length: Int(maxlen), encoding: NSUTF8StringEncoding, freeWhenDone: true) {
+		if let str = String(bytesNoCopy: buf, length: Int(maxlen), encoding: String.Encoding.utf8, freeWhenDone: true) {
 			return str;
 		}
 		return "";

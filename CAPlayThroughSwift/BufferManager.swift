@@ -28,9 +28,9 @@ class BufferManager {
 	
 	func fftOutputBufferLength() -> Int { return fftInputBufferLen / 2; }
 	
-	func copyAudioDataToFFTInputBuffer(inData: [Float]) {
+	func copyAudioDataToFFTInputBuffer(_ inData: [Float]) {
 		let framesToCopy = min(inData.count, fftInputBufferLen - fftInputBuffer.count);
-		fftInputBuffer.appendContentsOf(inData.prefix(framesToCopy));
+		fftInputBuffer.append(contentsOf: inData.prefix(framesToCopy));
 		if (fftInputBuffer.count >= fftInputBufferLen) {
 			OSAtomicIncrement32(&hasNewFFTData);
 			OSAtomicDecrement32(&needsNewFFTData);

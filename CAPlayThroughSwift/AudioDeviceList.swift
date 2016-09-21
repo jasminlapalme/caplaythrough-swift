@@ -37,18 +37,18 @@ class AudioDeviceList {
 		
 		var propsize: UInt32 = 0;
 		checkErr(AudioObjectGetPropertyDataSize(AudioObjectID(kAudioObjectSystemObject), &theAddress, 0, nil, &propsize));
-		let nDevices = Int(propsize) / sizeof(AudioDeviceID);
+		let nDevices = Int(propsize) / MemoryLayout<AudioDeviceID>.size;
 		
-		var devids = Array<AudioDeviceID>(count: nDevices, repeatedValue: 0);
+		var devids = Array<AudioDeviceID>(repeating: 0, count: nDevices);
 		devids.withUnsafeMutableBufferPointer {
-			(inout buffer: UnsafeMutableBufferPointer<AudioDeviceID>) -> () in
+			(buffer: inout UnsafeMutableBufferPointer<AudioDeviceID>) -> () in
 			checkErr(AudioObjectGetPropertyData(
 				AudioObjectID(kAudioObjectSystemObject),
 				&theAddress,
 				0,
 				nil,
 				&propsize,
-				buffer.baseAddress )
+				buffer.baseAddress! )
 			);
 		}
 		

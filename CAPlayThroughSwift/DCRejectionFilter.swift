@@ -13,7 +13,7 @@ class DCRejectionFilter {
 	var y1: Float = 0;
 	let kDefaultPoleDist: Float = 0.975;
 	
-	func processInplace(inout ioData: [Float]) {
+	func processInplace(_ ioData: inout [Float]) {
 		for i in 0...ioData.count-1 {
 			let xCurr = ioData[i];
 			ioData[i] = ioData[i] - x1 + (kDefaultPoleDist * y1);
