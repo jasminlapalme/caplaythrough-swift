@@ -189,6 +189,7 @@ class CARingBuffer {
 		return CARingBufferError.ok;	// success
 	}
 	
+	@discardableResult
 	func getTimeBounds(startTime: inout SampleTime, endTime: inout SampleTime) -> CARingBufferError {
 		for _ in 0...8 {
 			let curPtr = self.timeBoundsQueuePtr;

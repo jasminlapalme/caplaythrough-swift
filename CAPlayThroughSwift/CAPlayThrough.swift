@@ -185,6 +185,7 @@ class CAPlayThrough {
 		}
 	}
 	
+	@discardableResult
 	func start() -> OSStatus {
 		if isRunning() {
 			return noErr;
@@ -205,6 +206,7 @@ class CAPlayThrough {
 		return noErr;
 	}
 	
+	@discardableResult
 	func stop() -> OSStatus {
 		if !isRunning() {
 			return noErr;
@@ -633,6 +635,7 @@ class CAPlayThroughHost {
 		return (playThrough != nil) ? true : false;
 	}
 	
+	@discardableResult
 	func start() -> OSStatus {
 		if playThrough != nil {
 			return playThrough.start();
@@ -640,6 +643,7 @@ class CAPlayThroughHost {
 		return noErr;
 	}
 	
+	@discardableResult
 	func stop() -> OSStatus {
 		if playThrough != nil {
 			return playThrough.stop();
