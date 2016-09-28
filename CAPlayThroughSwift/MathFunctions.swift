@@ -8,6 +8,6 @@
 
 import Foundation
 
-func clamp<T where T: Comparable>(min min: T, x: T, max: T) -> T {
+func clamp<T>(min: T, x: T, max: T) -> T where T: Comparable {
 	return x < min ? min : (x > max ? max : x);
 }

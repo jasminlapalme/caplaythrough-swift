@@ -11,107 +11,25 @@ import AudioUnit;
 import CoreAudio;
 import AudioToolbox;
 
-func mergeAudioBufferList(abl: UnsafeMutableAudioBufferListPointer, inNumberFrames: UInt32) -> [Float] {
-	let umpab = abl.map({ return UnsafeMutablePointer<Float32>($0.mData) })
-	var b = Array<Float>(count: Int(inNumberFrames), repeatedValue: 0);
-	for (i, _) in b.enumerate() {
-		b[i] = umpab.reduce(Float(0), combine: { (f: Float, ab: UnsafeMutablePointer<Float32>) -> Float in
+func mergeAudioBufferList(_ abl: UnsafeMutableAudioBufferListPointer, inNumberFrames: UInt32) -> [Float] {
+    let umpab = abl.map({ return UnsafeMutableRawPointer($0.mData!).assumingMemoryBound(to: Float32.self) })
+	var b = Array<Float>(repeating: 0, count: Int(inNumberFrames));
+	for (i, _) in b.enumerated() {
+		b[i] = umpab.reduce(Float(0), { (f: Float, ab: UnsafeMutablePointer<Float32>) -> Float in
 			return f + ab[i];
 		})
 	}
 	return b;
 }
 
-func inputProc(inRefCon: UnsafeMutablePointer<Void>, ioActionFlags: UnsafeMutablePointer<AudioUnitRenderActionFlags>, inTimeStamp: UnsafePointer<AudioTimeStamp>, inBusNumber: UInt32, inNumberFrames: UInt32, ioData: UnsafeMutablePointer<AudioBufferList>) -> OSStatus {
-	let This = Unmanaged<CAPlayThrough>.fromOpaque(COpaquePointer(inRefCon)).takeUnretainedValue()
-	if (This.firstInputTime < 0) {
-		This.firstInputTime = inTimeStamp.memory.mSampleTime;
-	}
-	
-	// Get the new audio data
-	if let err = checkErr(AudioUnitRender(This.inputUnit, ioActionFlags, inTimeStamp, inBusNumber, inNumberFrames, This.inputBuffer.unsafeMutablePointer)) {
-		return err;
-	}
-	
-	var samples = mergeAudioBufferList(This.inputBuffer, inNumberFrames: inNumberFrames);
-	
-	if (This.bufferManager.needsNewFFTData > 0) {
-		This.dcRejectionFilter.processInplace(&samples);
-		This.bufferManager.copyAudioDataToFFTInputBuffer(samples);
-	}
-	
-	let ringBufferErr = This.buffer.store(This.inputBuffer, framesToWrite: inNumberFrames, startWrite: CARingBuffer.SampleTime(inTimeStamp.memory.mSampleTime))
-	
-	return ringBufferErr.toOSStatus();
-}
-
-func makeBufferSilent(ioData: UnsafeMutableAudioBufferListPointer) {
+func makeBufferSilent(_ ioData: UnsafeMutableAudioBufferListPointer) {
 	for buf in ioData {
 		memset(buf.mData, 0, Int(buf.mDataByteSize));
 	}
 }
 
-func outputProc(inRefCon: UnsafeMutablePointer<Void>, ioActionFlags: UnsafeMutablePointer<AudioUnitRenderActionFlags>, inTimeStamp: UnsafePointer<AudioTimeStamp>, inBusNumber: UInt32, inNumberFrames: UInt32, ioData: UnsafeMutablePointer<AudioBufferList>) -> OSStatus {
-	let This = Unmanaged<CAPlayThrough>.fromOpaque(COpaquePointer(inRefCon)).takeUnretainedValue()
-	var rate : Float64 = 0.0;
-	var inTS = AudioTimeStamp();
-	var outTS = AudioTimeStamp();
-	let abl = UnsafeMutableAudioBufferListPointer(ioData)
-	
-	if (This.firstInputTime < 0) {
-		// input hasn't run yet -> silence
-		makeBufferSilent (abl);
-		return noErr;
-	}
-	
-	// use the varispeed playback rate to offset small discrepancies in sample rate
-	// first find the rate scalars of the input and output devices
-	// this callback may still be called a few times after the device has been stopped
-	if (AudioDeviceGetCurrentTime(This.inputDevice.id, &inTS) != noErr) {
-		makeBufferSilent (abl);
-		return noErr;
-	}
-	
-	if let err = checkErr(AudioDeviceGetCurrentTime(This.outputDevice.id, &outTS)) {
-		return err;
-	}
-	
-	rate = inTS.mRateScalar / outTS.mRateScalar;
-	if let err = checkErr(AudioUnitSetParameter(This.varispeedUnit, kVarispeedParam_PlaybackRate, kAudioUnitScope_Global, 0, AudioUnitParameterValue(rate), 0)) {
-		return err;
-	}
-	
-	// get Delta between the devices and add it to the offset
-	if (This.firstOutputTime < 0) {
-		This.firstOutputTime = inTimeStamp.memory.mSampleTime;
-		let delta = (This.firstInputTime - This.firstOutputTime);
-		This.computeThruOffset();
-		// changed: 3865519 11/10/04
-		if (delta < 0.0) {
-			This.inToOutSampleOffset -= delta;
-		} else {
-			This.inToOutSampleOffset = -delta + This.inToOutSampleOffset;
-		}
-		
-		makeBufferSilent (abl);
-		return noErr;
-	}
-	
-	// copy the data from the buffers
-	let err = This.buffer.fetch(abl, nFrames: inNumberFrames, startRead: Int64(inTimeStamp.memory.mSampleTime - This.inToOutSampleOffset));
-	if (err != CARingBufferError.OK) {
-		makeBufferSilent (abl);
-		var bufferStartTime : Int64 = 0;
-		var bufferEndTime : Int64 = 0;
-		This.buffer.getTimeBounds(startTime: &bufferStartTime, endTime: &bufferEndTime);
-		This.inToOutSampleOffset = inTimeStamp.memory.mSampleTime - Float64(bufferStartTime);
-	}
-	
-	return noErr;
-}
-
 class CAPlayThrough {
-	var inputUnit: AudioUnit = nil;
+	var inputUnit: AudioUnit? = nil;
 	var inputBuffer = UnsafeMutableAudioBufferListPointer(nil);
 	var inputDevice: AudioDevice!;
 	var outputDevice: AudioDevice!;
@@ -121,16 +39,102 @@ class CAPlayThrough {
 	var dcRejectionFilter: DCRejectionFilter!;
 	
 	// AudioUnits and Graph
-	var graph: AUGraph = nil;
+	var graph: AUGraph? = nil;
 	var varispeedNode: AUNode = 0;
-	var varispeedUnit: AudioUnit = nil;
+	var varispeedUnit: AudioUnit? = nil;
 	var outputNode: AUNode = 0;
-	var outputUnit: AudioUnit = nil;
+	var outputUnit: AudioUnit? = nil;
 	
 	// Buffer sample info
 	var firstInputTime: Float64 = -1;
 	var firstOutputTime: Float64 = -1;
 	var inToOutSampleOffset: Float64 = 0;
+    
+    var outputProc: AURenderCallback = { (inRefCon, ioActionFlags, inTimeStamp, inBusNumber, inNumberFrames, ioData) -> OSStatus in
+        
+        let This = Unmanaged<CAPlayThrough>.fromOpaque(inRefCon).takeUnretainedValue()
+        var rate : Float64 = 0.0;
+        var inTS = AudioTimeStamp();
+        var outTS = AudioTimeStamp();
+        let abl = UnsafeMutableAudioBufferListPointer(ioData)
+        
+        if (This.firstInputTime < 0) {
+            // input hasn't run yet -> silence
+            makeBufferSilent (abl!);
+            return noErr;
+        }
+        
+        // use the varispeed playback rate to offset small discrepancies in sample rate
+        // first find the rate scalars of the input and output devices
+        // this callback may still be called a few times after the device has been stopped
+        if (AudioDeviceGetCurrentTime(This.inputDevice.id, &inTS) != noErr) {
+            makeBufferSilent (abl!);
+            return noErr;
+        }
+        
+        if let err = checkErr(AudioDeviceGetCurrentTime(This.outputDevice.id, &outTS)) {
+            return err;
+        }
+        
+        rate = inTS.mRateScalar / outTS.mRateScalar;
+        if let err = checkErr(AudioUnitSetParameter(This.varispeedUnit!, kVarispeedParam_PlaybackRate, kAudioUnitScope_Global, 0, AudioUnitParameterValue(rate), 0)) {
+            return err;
+        }
+        
+        // get Delta between the devices and add it to the offset
+        if (This.firstOutputTime < 0) {
+            This.firstOutputTime = inTimeStamp.pointee.mSampleTime;
+            let delta = (This.firstInputTime - This.firstOutputTime);
+            This.computeThruOffset();
+            // changed: 3865519 11/10/04
+            if (delta < 0.0) {
+                This.inToOutSampleOffset -= delta;
+            } else {
+                This.inToOutSampleOffset = -delta + This.inToOutSampleOffset;
+            }
+            
+            makeBufferSilent (abl!);
+            return noErr;
+        }
+        
+        // copy the data from the buffers
+        let err = This.buffer.fetch(abl!, nFrames: inNumberFrames, startRead: Int64(inTimeStamp.pointee.mSampleTime - This.inToOutSampleOffset));
+        if (err != CARingBufferError.ok) {
+            makeBufferSilent (abl!);
+            var bufferStartTime : Int64 = 0;
+            var bufferEndTime : Int64 = 0;
+            This.buffer.getTimeBounds(startTime: &bufferStartTime, endTime: &bufferEndTime);
+            This.inToOutSampleOffset = inTimeStamp.pointee.mSampleTime - Float64(bufferStartTime);
+        }
+        
+        return noErr;
+
+    }
+    
+    var inputProc: AURenderCallback = { (inRefCon, ioActionFlags, inTimeStamp, inBusNumber, inNumberFrames, ioData) -> OSStatus in
+     
+        let This = Unmanaged<CAPlayThrough>.fromOpaque(inRefCon).takeUnretainedValue()
+        if (This.firstInputTime < 0) {
+            This.firstInputTime = inTimeStamp.pointee.mSampleTime;
+        }
+        
+        // Get the new audio data
+        if let err = checkErr(AudioUnitRender(This.inputUnit!, ioActionFlags, inTimeStamp, inBusNumber, inNumberFrames, (This.inputBuffer?.unsafeMutablePointer)!)) {
+            return err;
+        }
+        
+        var samples = mergeAudioBufferList(This.inputBuffer!, inNumberFrames: inNumberFrames);
+        
+        if (This.bufferManager.needsNewFFTData > 0) {
+            This.dcRejectionFilter.processInplace(&samples);
+            This.bufferManager.copyAudioDataToFFTInputBuffer(samples);
+        }
+        
+        let ringBufferErr = This.buffer.store(This.inputBuffer!, framesToWrite: inNumberFrames, startWrite: CARingBuffer.SampleTime(inTimeStamp.pointee.mSampleTime))
+        
+        return ringBufferErr.toOSStatus();
+        
+    }
 	
 	init(input: AudioDeviceID, output: AudioDeviceID) {
 		// Note: You can interface to input and output devices with "output" audio units.
@@ -154,11 +158,11 @@ class CAPlayThrough {
 		}
 		
 		// the varispeed unit should only be conected after the input and output formats have been set
-		if let _ = checkErr(AUGraphConnectNodeInput(graph, varispeedNode, 0, outputNode, 0)) {
+		if let _ = checkErr(AUGraphConnectNodeInput(graph!, varispeedNode, 0, outputNode, 0)) {
 			exit(1);
 		}
 		
-		if let _ = checkErr(AUGraphInitialize(graph)) {
+		if let _ = checkErr(AUGraphInitialize(graph!)) {
 			exit(1);
 		}
 		
@@ -176,21 +180,22 @@ class CAPlayThrough {
 	func cleanup() {
 		stop();
 		
-		if inputBuffer.unsafePointer != nil {
-			free(inputBuffer.unsafeMutablePointer)
+		if inputBuffer?.unsafePointer != nil {
+			free(inputBuffer?.unsafeMutablePointer)
 		}
 	}
 	
+	@discardableResult
 	func start() -> OSStatus {
 		if isRunning() {
 			return noErr;
 		}
 		// Start pulling for audio data
-		if let err = checkErr(AudioOutputUnitStart(inputUnit)) {
+		if let err = checkErr(AudioOutputUnitStart(inputUnit!)) {
 			return err;
 		}
 		
-		if let err = checkErr(AUGraphStart(graph)) {
+		if let err = checkErr(AUGraphStart(graph!)) {
 			return err;
 		}
 		
@@ -201,14 +206,15 @@ class CAPlayThrough {
 		return noErr;
 	}
 	
+	@discardableResult
 	func stop() -> OSStatus {
 		if !isRunning() {
 			return noErr;
 		}
-		if let err = checkErr(AudioOutputUnitStop(inputUnit)) {
+		if let err = checkErr(AudioOutputUnitStop(inputUnit!)) {
 			return err;
 		}
-		if let err = checkErr(AUGraphStop(graph)) {
+		if let err = checkErr(AUGraphStop(graph!)) {
 			return err;
 		}
 		firstInputTime = -1;
@@ -220,23 +226,24 @@ class CAPlayThrough {
 		var auhalRunning : UInt32 = 0;
 		
 		var graphRunning : DarwinBoolean = false;
-		var size : UInt32 = UInt32(sizeof(UInt32));
+		var size : UInt32 = UInt32(MemoryLayout<UInt32>.size);
 		if (inputUnit != nil) {
-			if let _ = checkErr(AudioUnitGetProperty(inputUnit, kAudioOutputUnitProperty_IsRunning, kAudioUnitScope_Global, 0, &auhalRunning, &size)) {
+			if let _ = checkErr(AudioUnitGetProperty(inputUnit!, kAudioOutputUnitProperty_IsRunning, kAudioUnitScope_Global, 0, &auhalRunning, &size)) {
 				return false;
 			}
 		}
 		
 		if (graph != nil) {
-			if let _ = checkErr(AUGraphIsRunning(graph, &graphRunning)) {
+			if let _ = checkErr(AUGraphIsRunning(graph!, &graphRunning)) {
 				return false;
 			}
 		}
-		return (auhalRunning > 0 || graphRunning);
+		return (auhalRunning > 0 || graphRunning.boolValue);
 	}
 	
-	func setOutputDeviceAsCurrent(var out: AudioDeviceID) -> OSStatus {
-		var size = UInt32(sizeof(AudioDeviceID));
+	func setOutputDeviceAsCurrent(_ out: AudioDeviceID) -> OSStatus {
+		var out = out
+		var size = UInt32(MemoryLayout<AudioDeviceID>.size);
 		
 		var theAddress = AudioObjectPropertyAddress(
 			mSelector: kAudioHardwarePropertyDefaultOutputDevice,
@@ -253,12 +260,13 @@ class CAPlayThrough {
 		outputDevice = AudioDevice(devid: out, isInput: false);
 		
 		// Set the Current Device to the Default Output Unit.
-		return AudioUnitSetProperty(outputUnit, kAudioOutputUnitProperty_CurrentDevice, kAudioUnitScope_Global, 0,
-			&outputDevice.id, UInt32(sizeof(AudioDeviceID)));
+		return AudioUnitSetProperty(outputUnit!, kAudioOutputUnitProperty_CurrentDevice, kAudioUnitScope_Global, 0,
+			&outputDevice.id, UInt32(MemoryLayout<AudioDeviceID>.size));
 	}
 	
-	func setInputDeviceAsCurrent(var input: AudioDeviceID) -> OSStatus {
-		var size = UInt32(sizeof(AudioDeviceID));
+	func setInputDeviceAsCurrent(_ input: AudioDeviceID) -> OSStatus {
+		var input = input
+		var size = UInt32(MemoryLayout<AudioDeviceID>.size);
 		
 		var theAddress = AudioObjectPropertyAddress(
 			mSelector: kAudioHardwarePropertyDefaultInputDevice,
@@ -276,22 +284,22 @@ class CAPlayThrough {
 		
 		// Set the Current Device to the AUHAL.
 		// this should be done only after IO has been enabled on the AUHAL.
-		if let err = checkErr(AudioUnitSetProperty(inputUnit, kAudioOutputUnitProperty_CurrentDevice,
+		if let err = checkErr(AudioUnitSetProperty(inputUnit!, kAudioOutputUnitProperty_CurrentDevice,
 			kAudioUnitScope_Global, 0, &inputDevice.id,
-			UInt32(sizeof(AudioDeviceID)))) {
+			UInt32(MemoryLayout<AudioDeviceID>.size))) {
 				return err;
 		}
 		return noErr;
 	}
 	
-	func setupGraph(out: AudioDeviceID) -> OSStatus {
+	func setupGraph(_ out: AudioDeviceID) -> OSStatus {
 		// Make a New Graph
 		if let err = checkErr(NewAUGraph(&graph)) {
 			return err;
 		}
 		
 		// Open the Graph, AudioUnits are opened but not initialized
-		if let err = checkErr(AUGraphOpen(graph)) {
+		if let err = checkErr(AUGraphOpen(graph!)) {
 			return err;
 		}
 		
@@ -306,18 +314,19 @@ class CAPlayThrough {
 		// Tell the output unit not to reset timestamps
 		// Otherwise sample rate changes will cause sync los
 		var startAtZero : UInt32 = 0;
-		if let err = checkErr(AudioUnitSetProperty(outputUnit, kAudioOutputUnitProperty_StartTimestampsAtZero,
-			kAudioUnitScope_Global, 0, &startAtZero, UInt32(sizeof(UInt32)))) {
+		if let err = checkErr(AudioUnitSetProperty(outputUnit!, kAudioOutputUnitProperty_StartTimestampsAtZero,
+			kAudioUnitScope_Global, 0, &startAtZero, UInt32(MemoryLayout<UInt32>.size))) {
 				return err;
 		}
 		
+        
 		var output = AURenderCallbackStruct(
 			inputProc: outputProc,
-			inputProcRefCon: UnsafeMutablePointer<Void>(Unmanaged<CAPlayThrough>.passUnretained(self).toOpaque())
+			inputProcRefCon: UnsafeMutableRawPointer(Unmanaged<CAPlayThrough>.passUnretained(self).toOpaque())
 		);
 		
-		if let err = checkErr(AudioUnitSetProperty(varispeedUnit, kAudioUnitProperty_SetRenderCallback,
-			kAudioUnitScope_Input, 0, &output, UInt32(sizeof(AURenderCallbackStruct)))) {
+		if let err = checkErr(AudioUnitSetProperty(varispeedUnit!, kAudioUnitProperty_SetRenderCallback,
+			kAudioUnitScope_Input, 0, &output, UInt32(MemoryLayout<AURenderCallbackStruct>.size))) {
 				return err;
 		}
 		return noErr;
@@ -346,19 +355,19 @@ class CAPlayThrough {
 		/// MAKE NODES
 		// This creates a node in the graph that is an AudioUnit, using
 		// the supplied ComponentDescription to find and open that unit
-		if let err = checkErr(AUGraphAddNode(graph, &varispeedDesc, &varispeedNode)) {
+		if let err = checkErr(AUGraphAddNode(graph!, &varispeedDesc, &varispeedNode)) {
 			return err;
 		}
-		if let err = checkErr(AUGraphAddNode(graph, &outDesc, &outputNode)) {
+		if let err = checkErr(AUGraphAddNode(graph!, &outDesc, &outputNode)) {
 			return err;
 		}
 		
 		// Get Audio Units from AUGraph node
-		if let err = checkErr(AUGraphNodeInfo(graph, varispeedNode, nil, &varispeedUnit)) {
+		if let err = checkErr(AUGraphNodeInfo(graph!, varispeedNode, nil, &varispeedUnit)) {
 			return err;
 		}
 		
-		if let err = checkErr(AUGraphNodeInfo(graph, outputNode, nil, &outputUnit)) {
+		if let err = checkErr(AUGraphNodeInfo(graph!, outputNode, nil, &outputUnit)) {
 			return err;
 		}
 		
@@ -367,8 +376,8 @@ class CAPlayThrough {
 		return noErr;
 	}
 	
-	func setupAUHAL(input: AudioDeviceID) -> OSStatus {
-		var comp : AudioComponent;
+	func setupAUHAL(_ input: AudioDeviceID) -> OSStatus {
+		var comp : AudioComponent?;
 		var desc = AudioComponentDescription();
 		
 		// There are several different types of Audio Units.
@@ -393,12 +402,12 @@ class CAPlayThrough {
 		}
 		
 		// gains access to the services provided by the component
-		if let err = checkErr(AudioComponentInstanceNew(comp, &inputUnit)) {
+		if let err = checkErr(AudioComponentInstanceNew(comp!, &inputUnit)) {
 			return err;
 		}
 		
 		// AUHAL needs to be initialized before anything is done to it
-		if let err = checkErr(AudioUnitInitialize(inputUnit)) {
+		if let err = checkErr(AudioUnitInitialize(inputUnit!)) {
 			return err;
 		}
 		
@@ -417,7 +426,7 @@ class CAPlayThrough {
 		// Don't setup buffers until you know what the
 		// input and output device audio streams look like.
 		
-		if let err = checkErr(AudioUnitInitialize(inputUnit)) {
+		if let err = checkErr(AudioUnitInitialize(inputUnit!)) {
 			return err;
 		}
 		return noErr;
@@ -432,15 +441,15 @@ class CAPlayThrough {
 		// BEFORE setting the AUHAL's current device.
 		
 		// Enable input on the AUHAL
-		if let err = checkErr(AudioUnitSetProperty(inputUnit, kAudioOutputUnitProperty_EnableIO, kAudioUnitScope_Input, 1, // input element
-			&enableIO, UInt32(sizeof(UInt32)))) {
+		if let err = checkErr(AudioUnitSetProperty(inputUnit!, kAudioOutputUnitProperty_EnableIO, kAudioUnitScope_Input, 1, // input element
+			&enableIO, UInt32(MemoryLayout<UInt32>.size))) {
 				return err;
 		}
 		
 		// disable Output on the AUHAL
 		enableIO = 0;
-		if let err = checkErr(AudioUnitSetProperty(inputUnit, kAudioOutputUnitProperty_EnableIO, kAudioUnitScope_Output, 0, // output element
-			&enableIO, UInt32(sizeof(UInt32)))) {
+		if let err = checkErr(AudioUnitSetProperty(inputUnit!, kAudioOutputUnitProperty_EnableIO, kAudioUnitScope_Output, 0, // output element
+			&enableIO, UInt32(MemoryLayout<UInt32>.size))) {
 				return err;
 		}
 		return noErr;
@@ -449,13 +458,13 @@ class CAPlayThrough {
 	func callbackSetup() -> OSStatus {
 		var input = AURenderCallbackStruct(
 			inputProc: inputProc,
-			inputProcRefCon: UnsafeMutablePointer<Void>(Unmanaged<CAPlayThrough>.passUnretained(self).toOpaque())
+			inputProcRefCon: UnsafeMutableRawPointer(Unmanaged<CAPlayThrough>.passUnretained(self).toOpaque())
 		);
 		
 		// Setup the input callback.
-		if let err = checkErr(AudioUnitSetProperty(inputUnit, kAudioOutputUnitProperty_SetInputCallback,
+		if let err = checkErr(AudioUnitSetProperty(inputUnit!, kAudioOutputUnitProperty_SetInputCallback,
 			kAudioUnitScope_Global, 0, &input,
-			UInt32(sizeof(AURenderCallbackStruct)))) {
+			UInt32(MemoryLayout<AURenderCallbackStruct>.size))) {
 				return err;
 		}
 		return noErr;
@@ -471,31 +480,31 @@ class CAPlayThrough {
 		var rate : Float64 = 0;
 		
 		// Get the size of the IO buffer(s)
-		var propertySize = UInt32(sizeof(UInt32));
-		if let err = checkErr(AudioUnitGetProperty(inputUnit, kAudioDevicePropertyBufferFrameSize, kAudioUnitScope_Global, 0, &bufferSizeFrames, &propertySize)) {
+		var propertySize = UInt32(MemoryLayout<UInt32>.size);
+		if let err = checkErr(AudioUnitGetProperty(inputUnit!, kAudioDevicePropertyBufferFrameSize, kAudioUnitScope_Global, 0, &bufferSizeFrames, &propertySize)) {
 			return err;
 		}
-		bufferSizeBytes = bufferSizeFrames * UInt32(sizeof(Float32));
+		bufferSizeBytes = bufferSizeFrames * UInt32(MemoryLayout<Float32>.size);
 		
 		// Get the Stream Format (Output client side)
-		propertySize = UInt32(sizeof(AudioStreamBasicDescription));
-		if let err = checkErr(AudioUnitGetProperty(inputUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, 1, &asbd_dev1_in, &propertySize)) {
+		propertySize = UInt32(MemoryLayout<AudioStreamBasicDescription>.size);
+		if let err = checkErr(AudioUnitGetProperty(inputUnit!, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, 1, &asbd_dev1_in, &propertySize)) {
 			return err;
 		}
 		// printf("=====Input DEVICE stream format\n" );
 		// asbd_dev1_in.Print();
 		
 		// Get the Stream Format (client side)
-		propertySize = UInt32(sizeof(AudioStreamBasicDescription));
-		if let err = checkErr(AudioUnitGetProperty(inputUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 1, &asbd, &propertySize)) {
+		propertySize = UInt32(MemoryLayout<AudioStreamBasicDescription>.size);
+		if let err = checkErr(AudioUnitGetProperty(inputUnit!, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 1, &asbd, &propertySize)) {
 			return err;
 		}
 		// printf("=====current Input (Client) stream format\n");
 		// asbd.Print();
 		
 		// Get the Stream Format (Output client side)
-		propertySize = UInt32(sizeof(AudioStreamBasicDescription));
-		if let err = checkErr(AudioUnitGetProperty(outputUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 0, &asbd_dev2_out, &propertySize)) {
+		propertySize = UInt32(MemoryLayout<AudioStreamBasicDescription>.size);
+		if let err = checkErr(AudioUnitGetProperty(outputUnit!, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 0, &asbd_dev2_out, &propertySize)) {
 			return err;
 		}
 		// printf("=====Output (Device) stream format\n");
@@ -512,7 +521,7 @@ class CAPlayThrough {
 		
 		
 		// We must get the sample rate of the input device and set it to the stream format of AUHAL
-		propertySize = UInt32(sizeof(Float64));
+		propertySize = UInt32(MemoryLayout<Float64>.size);
 		var theAddress = AudioObjectPropertyAddress(
 			mSelector: kAudioDevicePropertyNominalSampleRate,
 			mScope: kAudioObjectPropertyScopeGlobal,
@@ -525,12 +534,12 @@ class CAPlayThrough {
 		
 		var maxFramesPerSlice: UInt32 = 4096;
 		
-		if let err = checkErr(AudioUnitSetProperty(inputUnit, kAudioUnitProperty_MaximumFramesPerSlice, kAudioUnitScope_Global, 0, &maxFramesPerSlice, UInt32(sizeof(UInt32)))) {
+		if let err = checkErr(AudioUnitSetProperty(inputUnit!, kAudioUnitProperty_MaximumFramesPerSlice, kAudioUnitScope_Global, 0, &maxFramesPerSlice, UInt32(MemoryLayout<UInt32>.size))) {
 			return err;
 		}
 		
-		var propSize = UInt32(sizeof(UInt32));
-		if let err = checkErr(AudioUnitGetProperty(inputUnit, kAudioUnitProperty_MaximumFramesPerSlice, kAudioUnitScope_Global, 0, &maxFramesPerSlice, &propSize)) {
+		var propSize = UInt32(MemoryLayout<UInt32>.size);
+		if let err = checkErr(AudioUnitGetProperty(inputUnit!, kAudioUnitProperty_MaximumFramesPerSlice, kAudioUnitScope_Global, 0, &maxFramesPerSlice, &propSize)) {
 			return err;
 		}
 		
@@ -538,39 +547,39 @@ class CAPlayThrough {
 		dcRejectionFilter = DCRejectionFilter();
 
 		asbd.mSampleRate = rate;
-		propertySize = UInt32(sizeof(AudioStreamBasicDescription));
+		propertySize = UInt32(MemoryLayout<AudioStreamBasicDescription>.size);
 		
 		// Set the new formats to the AUs...
-		if let err = checkErr(AudioUnitSetProperty(inputUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 1, &asbd, propertySize)) {
+		if let err = checkErr(AudioUnitSetProperty(inputUnit!, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 1, &asbd, propertySize)) {
 			return err;
 		}
 		
-		if let err = checkErr(AudioUnitSetProperty(varispeedUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, 0, &asbd, propertySize)) {
+		if let err = checkErr(AudioUnitSetProperty(varispeedUnit!, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, 0, &asbd, propertySize)) {
 			return err;
 		}
 		
 		// Set the correct sample rate for the output device, but keep the channel count the same
-		propertySize = UInt32(sizeof(Float64));
+		propertySize = UInt32(MemoryLayout<Float64>.size);
 		
 		if let err = checkErr(AudioObjectGetPropertyData(outputDevice.id, &theAddress, 0, nil, &propertySize, &rate)) {
 			return err;
 		}
 		
 		asbd.mSampleRate = rate;
-		propertySize = UInt32(sizeof(AudioStreamBasicDescription));
+		propertySize = UInt32(MemoryLayout<AudioStreamBasicDescription>.size);
 		
 		// Set the new audio stream formats for the rest of the AUs...
-		if let err = checkErr(AudioUnitSetProperty(varispeedUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 0, &asbd, propertySize)) {
+		if let err = checkErr(AudioUnitSetProperty(varispeedUnit!, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 0, &asbd, propertySize)) {
 			return err;
 		}
 		
-		if let err = checkErr(AudioUnitSetProperty(outputUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, 0, &asbd, propertySize)) {
+		if let err = checkErr(AudioUnitSetProperty(outputUnit!, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, 0, &asbd, propertySize)) {
 			return err;
 		}
 		
 		inputBuffer = AudioBufferList.allocate(maximumBuffers: Int(asbd.mChannelsPerFrame));
 		
-		for var buf in inputBuffer {
+		for var buf in inputBuffer! {
 			buf.mNumberChannels = 1;
 			buf.mDataByteSize = bufferSizeBytes;
 		}
@@ -589,7 +598,7 @@ class CAPlayThrough {
 }
 
 class CAPlayThroughHost {
-	var streamListenerQueue: dispatch_queue_t!;
+	var streamListenerQueue: DispatchQueue!;
 	var streamListenerBlock: AudioObjectPropertyListenerBlock!;
 	var playThrough : CAPlayThrough!;
 	
@@ -597,9 +606,9 @@ class CAPlayThroughHost {
 		createPlayThrough(input, output);
 	}
 	
-	func createPlayThrough(input: AudioDeviceID, _ output: AudioDeviceID) {
+	func createPlayThrough(_ input: AudioDeviceID, _ output: AudioDeviceID) {
 		playThrough = CAPlayThrough(input: input, output: output);
-		streamListenerQueue = dispatch_queue_create("com.CAPlayThough.StreamListenerQueue", DISPATCH_QUEUE_SERIAL);
+		streamListenerQueue = DispatchQueue(label: "com.CAPlayThough.StreamListenerQueue", attributes: []);
 		addDeviceListeners(input);
 	}
 	
@@ -626,6 +635,7 @@ class CAPlayThroughHost {
 		return (playThrough != nil) ? true : false;
 	}
 	
+	@discardableResult
 	func start() -> OSStatus {
 		if playThrough != nil {
 			return playThrough.start();
@@ -633,6 +643,7 @@ class CAPlayThroughHost {
 		return noErr;
 	}
 	
+	@discardableResult
 	func stop() -> OSStatus {
 		if playThrough != nil {
 			return playThrough.stop();
@@ -647,7 +658,7 @@ class CAPlayThroughHost {
 		return false;
 	}
 	
-	func addDeviceListeners(input: AudioDeviceID) {
+	func addDeviceListeners(_ input: AudioDeviceID) {
 		streamListenerBlock = { (inNumberAddresses: UInt32, inAddresses: UnsafePointer<AudioObjectPropertyAddress>) in
 			self.resetPlayThrough();
 		};
@@ -664,15 +675,15 @@ class CAPlayThroughHost {
 			return;
 		}
 		
-		let streams = UnsafeMutablePointer<AudioStreamID>.alloc(Int(propSize));
-		let streamsBuf = UnsafeMutableBufferPointer<AudioStreamID>(start: streams, count: Int(propSize) / sizeof(AudioStreamID));
+		let streams = UnsafeMutablePointer<AudioStreamID>.allocate(capacity: Int(propSize));
+		let streamsBuf = UnsafeMutableBufferPointer<AudioStreamID>(start: streams, count: Int(propSize) / MemoryLayout<AudioStreamID>.size);
 		
 		if let _ = checkErr(AudioObjectGetPropertyData(input, &theAddress, 0, nil, &propSize, streams)) {
 			return;
 		}
 		
 		for stream in streamsBuf {
-			propSize = UInt32(sizeof(UInt32));
+			propSize = UInt32(MemoryLayout<UInt32>.size);
 			theAddress.mSelector = kAudioStreamPropertyDirection;
 			theAddress.mScope = kAudioObjectPropertyScopeGlobal;
 			
@@ -690,7 +701,7 @@ class CAPlayThroughHost {
 		free(streams)
 	}
 	
-	func removeDeviceListeners(input: AudioDeviceID) {
+	func removeDeviceListeners(_ input: AudioDeviceID) {
 		var theAddress = AudioObjectPropertyAddress(
 			mSelector: kAudioDevicePropertyStreams,
 			mScope: kAudioDevicePropertyScopeInput,
@@ -702,15 +713,15 @@ class CAPlayThroughHost {
 			return;
 		}
 		
-		let streams = UnsafeMutablePointer<AudioStreamID>.alloc(Int(propSize));
-		let streamsBuf = UnsafeMutableBufferPointer<AudioStreamID>(start: streams, count: Int(propSize) / sizeof(AudioStreamID));
+		let streams = UnsafeMutablePointer<AudioStreamID>.allocate(capacity: Int(propSize));
+		let streamsBuf = UnsafeMutableBufferPointer<AudioStreamID>(start: streams, count: Int(propSize) / MemoryLayout<AudioStreamID>.size);
 		
 		if let _ = checkErr(AudioObjectGetPropertyData(input, &theAddress, 0, nil, &propSize, streams)) {
 			return;
 		}
 		
 		for stream in streamsBuf {
-			propSize = UInt32(sizeof(UInt32));
+			propSize = UInt32(MemoryLayout<UInt32>.size);
 			theAddress.mSelector = kAudioStreamPropertyDirection;
 			theAddress.mScope = kAudioObjectPropertyScopeGlobal;
 			

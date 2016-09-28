@@ -10,17 +10,17 @@ import Foundation
 import CoreAudio
 
 enum CARingBufferError {
-	case OK
-	case TooMuch
-	case CPUOverload
+	case ok
+	case tooMuch
+	case cpuOverload
 	
 	func toOSStatus() -> OSStatus {
 		switch self {
-		case .OK:
+		case .ok:
 			return noErr;
-		case .CPUOverload:
+		case .cpuOverload:
 			return 4;
-		case .TooMuch:
+		case .tooMuch:
 			return 3;
 		}
 	}
@@ -29,7 +29,7 @@ enum CARingBufferError {
 let kGeneralRingTimeBoundsQueueSize : Int32 = 32;
 let kGeneralRingTimeBoundsQueueMask = kGeneralRingTimeBoundsQueueSize - 1;
 
-func ZeroRange(buffers: [ [UInt8] ], offset: Int, nbytes: Int) {
+func ZeroRange(_ buffers: [ [UInt8] ], offset: Int, nbytes: Int) {
 	if (nbytes <= 0) {
 		return;
 	}
@@ -40,26 +40,26 @@ func ZeroRange(buffers: [ [UInt8] ], offset: Int, nbytes: Int) {
 	}
 }
 
-func StoreABL(inout buffers: [ [UInt8] ], destOffset: Int, abl: UnsafeMutableAudioBufferListPointer, srcOffset: Int, nbytes: Int) {
-	for (i, src) in abl.enumerate() {
+func StoreABL(_ buffers: inout [ [UInt8] ], destOffset: Int, abl: UnsafeMutableAudioBufferListPointer, srcOffset: Int, nbytes: Int) {
+	for (i, src) in abl.enumerated() {
 		if (srcOffset > Int(src.mDataByteSize)) {
 			continue;
 		}
 		let count = min(nbytes, Int(src.mDataByteSize) - srcOffset);
-		let s = UnsafeBufferPointer<UInt8>(start: UnsafePointer<UInt8>(src.mData), count: Int(src.mDataByteSize));
+        let s = UnsafeBufferPointer<UInt8>(start: UnsafeRawPointer(src.mData!).assumingMemoryBound(to: UInt8.self), count: Int(src.mDataByteSize));
 		for j in 0..<count {
 			buffers[i][destOffset + j] = s[srcOffset + j];
 		}
 	}
 }
 
-func FetchABL(abl: UnsafeMutableAudioBufferListPointer, destOffset: Int, buffers: [ [UInt8] ], srcOffset: Int, nbytes: Int) {
+func FetchABL(_ abl: UnsafeMutableAudioBufferListPointer, destOffset: Int, buffers: [ [UInt8] ], srcOffset: Int, nbytes: Int) {
 	for (dest, var b) in zip(abl, buffers) {
 		if (destOffset > Int(dest.mDataByteSize)) {
 			continue;
 		}
 		let count = min(nbytes, Int(dest.mDataByteSize) - destOffset);
-		let d = UnsafeMutableBufferPointer<UInt8>(start: UnsafeMutablePointer<UInt8>(dest.mData),
+        let d = UnsafeMutableBufferPointer<UInt8>(start: UnsafeMutableRawPointer(dest.mData!).assumingMemoryBound(to: UInt8.self),
 			count: Int(dest.mDataByteSize));
 		for j in 0..<count {
 			d[destOffset + j] = b[srcOffset + j];
@@ -67,12 +67,12 @@ func FetchABL(abl: UnsafeMutableAudioBufferListPointer, destOffset: Int, buffers
 	}
 }
 
-func ZeroABL(abl: UnsafeMutableAudioBufferListPointer, destOffset: Int, nbytes: Int) {
+func ZeroABL(_ abl: UnsafeMutableAudioBufferListPointer, destOffset: Int, nbytes: Int) {
 	for dest in abl {
 		if (destOffset > Int(dest.mDataByteSize)) {
 			continue;
 		}
-		let d = UnsafeMutablePointer<UInt8>(dest.mData);
+        let d = UnsafeMutableRawPointer(dest.mData!).assumingMemoryBound(to: UInt8.self);
 		memset(d + destOffset, 0, min(nbytes, Int(dest.mDataByteSize) - destOffset));
 	}
 }
@@ -90,12 +90,12 @@ class CARingBuffer {
 	var timeBoundsQueue : [TimeBounds] = []; // kGeneralRingTimeBoundsQueueSize
 	var timeBoundsQueuePtr : Int32 = 0;
 	
-	func allocate(nChannels: Int, bytesPerFrame: UInt32, capacityFrames: UInt32) {
+	func allocate(_ nChannels: Int, bytesPerFrame: UInt32, capacityFrames: UInt32) {
 		self.bytesPerFrame = bytesPerFrame;
 		self.capacityFrames = NextPowerOfTwo(capacityFrames);
 		self.capacityFramesMask = self.capacityFrames - 1;
 		self.capacityBytes = bytesPerFrame * self.capacityFrames;
-		self.buffers = (1...nChannels).map({ _ in [UInt8](count: Int(self.capacityBytes), repeatedValue: 0)})
+		self.buffers = (1...nChannels).map({ _ in [UInt8](repeating: 0, count: Int(self.capacityBytes))})
 		self.timeBoundsQueue = (1...kGeneralRingTimeBoundsQueueSize).map({ _ in
 			TimeBounds(0, 0, 0)})
 		self.timeBoundsQueuePtr = 0;
@@ -115,11 +115,11 @@ class CARingBuffer {
 		return self.timeBoundsQueue[Int(self.timeBoundsQueuePtr & kGeneralRingTimeBoundsQueueMask)].endTime;
 	}
 	
-	func frameOffset(frameNumber: SampleTime) -> Int {
+	func frameOffset(_ frameNumber: SampleTime) -> Int {
 		return Int((frameNumber & SampleTime(self.capacityFramesMask)) * SampleTime(self.bytesPerFrame));
 	}
 	
-	func setTimeBounds(startTime: SampleTime, _ endTime: SampleTime) {
+	func setTimeBounds(_ startTime: SampleTime, _ endTime: SampleTime) {
 		let nextPtr = self.timeBoundsQueuePtr + 1;
 		let index = Int(nextPtr & kGeneralRingTimeBoundsQueueMask);
 		
@@ -127,17 +127,17 @@ class CARingBuffer {
 		self.timeBoundsQueue[index].endTime = endTime;
 		self.timeBoundsQueue[index].updateCounter = nextPtr;
 		
-		withUnsafeMutablePointer(&timeBoundsQueuePtr) { (ptr: UnsafeMutablePointer<Int32>) -> Void in
+		withUnsafeMutablePointer(to: &timeBoundsQueuePtr) { (ptr: UnsafeMutablePointer<Int32>) -> Void in
 			OSAtomicCompareAndSwap32Barrier(Int32(self.timeBoundsQueuePtr), Int32(self.timeBoundsQueuePtr + 1), ptr);
 		}
 	}
 	
-	func store(abl: UnsafeMutableAudioBufferListPointer, framesToWrite: UInt32, startWrite: SampleTime) -> CARingBufferError {
+	func store(_ abl: UnsafeMutableAudioBufferListPointer, framesToWrite: UInt32, startWrite: SampleTime) -> CARingBufferError {
 		if framesToWrite == 0 {
-			return CARingBufferError.OK;
+			return CARingBufferError.ok;
 		}
 		if framesToWrite > self.capacityFrames {
-			return CARingBufferError.TooMuch;
+			return CARingBufferError.tooMuch;
 		}
 		
 		let endWrite = startWrite + SampleTime(framesToWrite);
@@ -186,10 +186,11 @@ class CARingBuffer {
 		// now update the end time
 		setTimeBounds(startTime(), endWrite);
 		
-		return CARingBufferError.OK;	// success
+		return CARingBufferError.ok;	// success
 	}
 	
-	func getTimeBounds(inout startTime startTime: SampleTime, inout endTime: SampleTime) -> CARingBufferError {
+	@discardableResult
+	func getTimeBounds(startTime: inout SampleTime, endTime: inout SampleTime) -> CARingBufferError {
 		for _ in 0...8 {
 			let curPtr = self.timeBoundsQueuePtr;
 			let index = curPtr & kGeneralRingTimeBoundsQueueMask;
@@ -198,36 +199,37 @@ class CARingBuffer {
 			endTime = bounds.endTime;
 			let newPtr = bounds.updateCounter;
 			if (newPtr == curPtr) {
-				return CARingBufferError.OK;
+				return CARingBufferError.ok;
 			}
 		}
-		return CARingBufferError.CPUOverload;
+		return CARingBufferError.cpuOverload;
 	}
 	
-	func clipTimeBounds(inout startRead startRead: SampleTime, inout endRead: SampleTime) -> CARingBufferError {
+	func clipTimeBounds(startRead: inout SampleTime, endRead: inout SampleTime) -> CARingBufferError {
 		var startTime: SampleTime = 0;
 		var endTime: SampleTime = 0;
 		let err = getTimeBounds(startTime: &startTime, endTime: &endTime)
 		
-		if err != CARingBufferError.OK {
+		if err != CARingBufferError.ok {
 			return err;
 		}
 		
 		if (startRead > endTime || endRead < startTime) {
 			endRead = startRead;
-			return CARingBufferError.OK;
+			return CARingBufferError.ok;
 		}
 		
 		startRead = max(startRead, startTime);
 		endRead = min(endRead, endTime);
 		endRead = max(endRead, startRead);
 		
-		return CARingBufferError.OK;	// success
+		return CARingBufferError.ok;	// success
 	}
 	
-	func fetch(abl: UnsafeMutableAudioBufferListPointer, nFrames: UInt32, var startRead: SampleTime) -> CARingBufferError {
+	func fetch(_ abl: UnsafeMutableAudioBufferListPointer, nFrames: UInt32, startRead: SampleTime) -> CARingBufferError {
+		var startRead = startRead
 		if (nFrames == 0) {
-			return CARingBufferError.OK;
+			return CARingBufferError.ok;
 		}
 		
 		startRead = max(0, startRead);
@@ -238,13 +240,13 @@ class CARingBuffer {
 		let endRead0 = endRead;
 		
 		let err = clipTimeBounds(startRead: &startRead, endRead: &endRead);
-		if err != CARingBufferError.OK {
+		if err != CARingBufferError.ok {
 			return err;
 		}
 		
 		if (startRead == endRead) {
 			ZeroABL(abl, destOffset: 0, nbytes: Int(nFrames * bytesPerFrame));
-			return CARingBufferError.OK;
+			return CARingBufferError.ok;
 		}
 		
 		let byteSize = (endRead - startRead) * SampleTime(bytesPerFrame);
@@ -278,6 +280,6 @@ class CARingBuffer {
 			dest.mDataByteSize = UInt32(nbytes);
 		}
 		
-		return CARingBufferError.OK;
+		return CARingBufferError.ok;
 	}
 }

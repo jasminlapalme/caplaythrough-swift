@@ -8,7 +8,8 @@
 
 import Foundation
 
-func checkErr(@autoclosure err : () -> OSStatus, file: String = __FILE__, line: Int = __LINE__) -> OSStatus! {
+@discardableResult
+func checkErr(_ err : @autoclosure () -> OSStatus, file: String = #file, line: Int = #line) -> OSStatus! {
 	let error = err()
 	if (error != noErr) {
 		print("CAPlayThrough Error: \(error) ->  \(file):\(line)\n");
