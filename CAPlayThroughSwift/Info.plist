@@ -30,5 +30,7 @@
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Microphone permission is used to capture Input Device and/or System Audio streams.</string>
 </dict>
 </plist>
