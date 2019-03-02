@@ -30,12 +30,12 @@ class FFTView: NSView {
 		super.init(coder: coder);
 		self.canDrawConcurrently = true;
 		timer = Timer(timeInterval: 1.0/20.0, target: self, selector: #selector(FFTView.fire), userInfo: nil, repeats: true);
-		RunLoop.main.add(timer, forMode: RunLoopMode.defaultRunLoopMode);
+    RunLoop.main.add(timer, forMode: .default);
 	}
 	
 	override var intrinsicContentSize : NSSize {
 		get {
-			return NSMakeSize(NSViewNoIntrinsicMetric, 100);
+      return NSMakeSize(NSView.noIntrinsicMetric, 100);
 		}
 	}
 	
@@ -98,7 +98,7 @@ class FFTView: NSView {
 		}
 	}
 	
-	func fire() {
+  @objc func fire() {
 		if self.playThroughHost.playThrough.bufferManager.hasNewFFTData > 0 {
 			self.needsDisplay = true;
 		}

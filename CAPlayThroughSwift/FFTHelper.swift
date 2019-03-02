@@ -30,8 +30,8 @@ class FFTHelper {
 	
 	deinit {
 		vDSP_destroy_fftsetup(spectrumAnalysis);
-		dspSplitComplex.realp.deallocate(capacity: Int(fftLength))
-		dspSplitComplex.imagp.deallocate(capacity: Int(fftLength))
+		dspSplitComplex.realp.deallocate()
+		dspSplitComplex.imagp.deallocate()
 	}
 	
 	func computeFFT(_ inAudioData: [Float]) -> [Float] {

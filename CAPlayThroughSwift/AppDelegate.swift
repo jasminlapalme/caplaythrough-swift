@@ -23,8 +23,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 	var outputDeviceList: AudioDeviceList;
 	var inputDevice: AudioDeviceID = 0;
 	var outputDevice: AudioDeviceID = 0;
-	dynamic var selectedInputDevice: Device!;
-	dynamic var selectedOutputDevice: Device!;
+  @objc dynamic var selectedInputDevice: Device!;
+  @objc dynamic var selectedOutputDevice: Device!;
 	var playThroughHost: CAPlayThroughHost!;
 	
 	override init() {

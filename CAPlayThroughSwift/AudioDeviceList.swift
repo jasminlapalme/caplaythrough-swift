@@ -10,7 +10,7 @@ import Foundation
 import CoreAudio
 
 class Device : NSObject {
-	var name: String;
+	@objc var name: String;
 	var id: AudioDeviceID;
 	
 	init(name: String, id: AudioDeviceID) {
