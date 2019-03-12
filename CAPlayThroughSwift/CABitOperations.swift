@@ -8,25 +8,44 @@
 
 import Foundation
 
-func CountLeadingZeroes(_ x: UInt32) -> UInt32 {
-	var x = x
-	var n : UInt32 = 32;
-	var y : UInt32;
-	
-	y = x >> 16; if (y != 0) { n = n - 16; x = y; }
-	y = x >> 8; if (y != 0) { n = n - 8; x = y; }
-	y = x >> 4; if (y != 0) { n = n - 4; x = y; }
-	y = x >> 2; if (y != 0) { n = n - 2; x = y; }
-	y = x >> 1; if (y != 0) { return n - 2; }
-	
-	return n - x;
+func countLeadingZeroes(_ number: UInt32) -> UInt32 {
+	var number = number
+	var count: UInt32 = 32
+	var shift: UInt32
+
+	shift = number >> 16
+  if shift != 0 {
+    count -= 16
+    number = shift
+  }
+	shift = number >> 8
+  if shift != 0 {
+    count -= 8
+    number = shift
+  }
+	shift = number >> 4
+  if shift != 0 {
+    count -= 4
+    number = shift
+  }
+	shift = number >> 2
+  if shift != 0 {
+    count -= 2
+    number = shift
+  }
+	shift = number >> 1
+  if shift != 0 {
+    return count - 2
+  }
+
+	return count - number
 }
 
 // base 2 log of next power of two greater or equal to x
-func Log2Ceil(_ x: UInt32) -> UInt32 {
-	return 32 - CountLeadingZeroes(x - 1);
+func log2Ceil(_ val: UInt32) -> UInt32 {
+	return 32 - countLeadingZeroes(val - 1)
 }
 
-func NextPowerOfTwo(_ x: UInt32) -> UInt32 {
-	return 1 << Log2Ceil(x);
+func nextPowerOfTwo(_ val: UInt32) -> UInt32 {
+	return 1 << log2Ceil(val)
 }

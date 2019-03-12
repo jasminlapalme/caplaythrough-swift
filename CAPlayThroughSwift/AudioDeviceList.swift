@@ -9,39 +9,39 @@
 import Foundation
 import CoreAudio
 
-class Device : NSObject {
-	@objc var name: String;
-	var id: AudioDeviceID;
-	
-	init(name: String, id: AudioDeviceID) {
-		self.name = name;
-		self.id = id;
+class Device: NSObject {
+	@objc var name: String
+	var identifier: AudioDeviceID
+
+	init(name: String, identifier: AudioDeviceID) {
+		self.name = name
+		self.identifier = identifier
 	}
 }
 
 class AudioDeviceList {
-	var devices: [Device] = [];
-	var areInputs: Bool = false;
-	
+	var devices: [Device] = []
+	var areInputs: Bool = false
+
 	init(areInputs: Bool) {
-		self.areInputs = areInputs;
-		buildList();
+		self.areInputs = areInputs
+		buildList()
 	}
-	
+
 	func buildList() {
 		var theAddress = AudioObjectPropertyAddress(
 			mSelector: kAudioHardwarePropertyDevices,
 			mScope: kAudioObjectPropertyScopeGlobal,
 			mElement: kAudioObjectPropertyElementMaster
-		);
-		
-		var propsize: UInt32 = 0;
-		checkErr(AudioObjectGetPropertyDataSize(AudioObjectID(kAudioObjectSystemObject), &theAddress, 0, nil, &propsize));
-		let nDevices = Int(propsize) / MemoryLayout<AudioDeviceID>.size;
-		
-		var devids = Array<AudioDeviceID>(repeating: 0, count: nDevices);
+		)
+
+		var propsize: UInt32 = 0
+		checkErr(AudioObjectGetPropertyDataSize(AudioObjectID(kAudioObjectSystemObject), &theAddress, 0, nil, &propsize))
+		let nDevices = Int(propsize) / MemoryLayout<AudioDeviceID>.size
+
+		var devids = [AudioDeviceID](repeating: 0, count: nDevices)
 		devids.withUnsafeMutableBufferPointer {
-			(buffer: inout UnsafeMutableBufferPointer<AudioDeviceID>) -> () in
+			(buffer: inout UnsafeMutableBufferPointer<AudioDeviceID>) -> Void in
 			checkErr(AudioObjectGetPropertyData(
 				AudioObjectID(kAudioObjectSystemObject),
 				&theAddress,
@@ -49,12 +49,12 @@ class AudioDeviceList {
 				nil,
 				&propsize,
 				buffer.baseAddress! )
-			);
+			)
 		}
-		
+
 		devices = devids
 			.map { AudioDevice(devid: $0, isInput: areInputs) }
-			.filter { $0.CountChannels() > 0 }
-			.map { Device(name: $0.name(), id: $0.id) }
+			.filter { $0.countChannels() > 0 }
+			.map { Device(name: $0.name(), identifier: $0.identifier) }
 	}
 }

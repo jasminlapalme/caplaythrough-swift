@@ -11,36 +11,36 @@ import CoreAudio
 
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate {
-	
+
 	@IBOutlet weak var window: NSWindow!
 	@IBOutlet weak var inputDeviceController: NSArrayController!
 	@IBOutlet weak var outputDeviceController: NSArrayController!
 	@IBOutlet weak var stopStartButton: NSButton!
 	@IBOutlet weak var progress: NSProgressIndicator!
-	@IBOutlet weak var fftView: FFTView!;
-	
-	var inputDeviceList: AudioDeviceList;
-	var outputDeviceList: AudioDeviceList;
-	var inputDevice: AudioDeviceID = 0;
-	var outputDevice: AudioDeviceID = 0;
-  @objc dynamic var selectedInputDevice: Device!;
-  @objc dynamic var selectedOutputDevice: Device!;
-	var playThroughHost: CAPlayThroughHost!;
-	
+	@IBOutlet weak var fftView: FFTView!
+
+	var inputDeviceList: AudioDeviceList
+	var outputDeviceList: AudioDeviceList
+	var inputDevice: AudioDeviceID = 0
+	var outputDevice: AudioDeviceID = 0
+  @objc dynamic var selectedInputDevice: Device!
+  @objc dynamic var selectedOutputDevice: Device!
+	var playThroughHost: CAPlayThroughHost!
+
 	override init() {
-		self.inputDeviceList = AudioDeviceList(areInputs: true);
-		self.outputDeviceList = AudioDeviceList(areInputs: false);
+		self.inputDeviceList = AudioDeviceList(areInputs: true)
+		self.outputDeviceList = AudioDeviceList(areInputs: false)
 	}
-	
+
 	override func awakeFromNib() {
-		var propsize = UInt32(MemoryLayout<AudioDeviceID>.size);
-		
+		var propsize = UInt32(MemoryLayout<AudioDeviceID>.size)
+
 		var theAddress = AudioObjectPropertyAddress(
 			mSelector: kAudioHardwarePropertyDefaultInputDevice,
 			mScope: kAudioObjectPropertyScopeGlobal,
 			mElement: kAudioObjectPropertyElementMaster
-		);
-		
+		)
+
 		checkErr(AudioObjectGetPropertyData(
 			AudioObjectID(kAudioObjectSystemObject),
 			&theAddress,
@@ -48,10 +48,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 			nil,
 			&propsize,
 			&inputDevice)
-		);
-		
-		propsize = UInt32(MemoryLayout<AudioDeviceID>.size);
-		theAddress.mSelector = kAudioHardwarePropertyDefaultOutputDevice;
+		)
+
+		propsize = UInt32(MemoryLayout<AudioDeviceID>.size)
+		theAddress.mSelector = kAudioHardwarePropertyDefaultOutputDevice
 		checkErr(AudioObjectGetPropertyData(
 			AudioObjectID(kAudioObjectSystemObject),
 			&theAddress,
@@ -59,83 +59,82 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 			nil,
 			&propsize,
 			&outputDevice)
-		);
-		
-		self.inputDeviceController.content = self.inputDeviceList.devices;
-		self.outputDeviceController.content = self.outputDeviceList.devices;
-		
-		self.selectedInputDevice = self.inputDeviceList.devices.filter({ return $0.id == inputDevice }).first
-		self.selectedOutputDevice = self.outputDeviceList.devices.filter({ return $0.id == outputDevice }).first
-		
-		playThroughHost = CAPlayThroughHost(input: inputDevice,output: outputDevice);
-		self.fftView.playThroughHost = playThroughHost;
+		)
+
+		self.inputDeviceController.content = self.inputDeviceList.devices
+		self.outputDeviceController.content = self.outputDeviceList.devices
+
+		self.selectedInputDevice = self.inputDeviceList.devices.filter({ return $0.identifier == inputDevice }).first
+		self.selectedOutputDevice = self.outputDeviceList.devices.filter({ return $0.identifier == outputDevice }).first
+
+		playThroughHost = CAPlayThroughHost(input: inputDevice, output: outputDevice)
+		self.fftView.playThroughHost = playThroughHost
 	}
-	
+
 	func applicationDidFinishLaunching(_ aNotification: Notification) {
 		// Insert code here to initialize your application
 	}
-	
+
 	func applicationWillTerminate(_ aNotification: Notification) {
 		// Insert code here to tear down your application
 	}
-	
+
 	func start() {
 		if playThroughHost.isRunning() {
-			return;
+			return
 		}
-		stopStartButton.title = "Stop";
-		playThroughHost.start();
-		progress.isHidden = false;
-		progress.startAnimation(self);
+		stopStartButton.title = "Stop"
+		playThroughHost.start()
+		progress.isHidden = false
+		progress.startAnimation(self)
 	}
-	
+
 	func stop() {
 		if !playThroughHost.isRunning() {
-			return;
+			return
 		}
-		stopStartButton.title = "Start";
-		playThroughHost.stop();
-		progress.isHidden = true;
-		progress.stopAnimation(self);
+		stopStartButton.title = "Start"
+		playThroughHost.stop()
+		progress.isHidden = true
+		progress.stopAnimation(self)
 	}
-	
+
 	func resetPlayThrough() {
 		if playThroughHost.playThroughExists() {
-			playThroughHost.deletePlayThrough();
+			playThroughHost.deletePlayThrough()
 		}
-		playThroughHost.createPlayThrough(inputDevice, outputDevice);
+		playThroughHost.createPlayThrough(inputDevice, outputDevice)
 	}
-	
+
 	@IBAction func startStop(_ sender: NSButton) {
 		if !playThroughHost.playThroughExists() {
-			self.playThroughHost.createPlayThrough(inputDevice, outputDevice);
+			self.playThroughHost.createPlayThrough(inputDevice, outputDevice)
 		}
-		
+
 		if !playThroughHost.isRunning() {
-			start();
+			start()
 		} else {
-			stop();
+			stop()
 		}
 	}
-	
+
 	@IBAction func inputDeviceSelected(_ sender: NSPopUpButton) {
-		if (selectedInputDevice.id == inputDevice) {
-			return;
+		if selectedInputDevice.identifier == inputDevice {
+			return
 		}
-		
-		stop();
-		inputDevice = selectedInputDevice.id;
-		resetPlayThrough();
+
+		stop()
+		inputDevice = selectedInputDevice.identifier
+		resetPlayThrough()
 	}
-	
+
 	@IBAction func outputDeviceSelected(_ sender: NSPopUpButton) {
-		if (selectedOutputDevice.id == outputDevice) {
-			return;
+		if selectedOutputDevice.identifier == outputDevice {
+			return
 		}
-		
-		stop();
-		outputDevice = selectedOutputDevice.id;
-		resetPlayThrough();
+
+		stop()
+		outputDevice = selectedOutputDevice.identifier
+		resetPlayThrough()
 	}
 }
-

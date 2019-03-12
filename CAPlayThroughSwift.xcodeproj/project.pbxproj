@@ -20,6 +20,8 @@
 		DA79DE9E1C346FEB00B6ED9A /* CARingBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA79DE9D1C346FEB00B6ED9A /* CARingBuffer.swift */; };
 		DA79DEA01C34965200B6ED9A /* CABitOperations.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA79DE9F1C34965200B6ED9A /* CABitOperations.swift */; };
 		DA8521BA1C5412B30035477E /* MathFunctions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA8521B91C5412B30035477E /* MathFunctions.swift */; };
+		DA9A542E222B173F0052BA78 /* CAPlayThroughHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA9A542D222B173F0052BA78 /* CAPlayThroughHost.swift */; };
+		DA9A5430223819AC0052BA78 /* CAPlayThrough+Setup.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA9A542F223819AC0052BA78 /* CAPlayThrough+Setup.swift */; };
 		DABFCAF61C39E52500C82F20 /* CAPlayThrough.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA79DE9B1C34690B00B6ED9A /* CAPlayThrough.swift */; };
 /* End PBXBuildFile section */
 
@@ -40,6 +42,8 @@
 		DA79DE9D1C346FEB00B6ED9A /* CARingBuffer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CARingBuffer.swift; sourceTree = "<group>"; wrapsLines = 0; };
 		DA79DE9F1C34965200B6ED9A /* CABitOperations.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CABitOperations.swift; sourceTree = "<group>"; };
 		DA8521B91C5412B30035477E /* MathFunctions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MathFunctions.swift; sourceTree = "<group>"; };
+		DA9A542D222B173F0052BA78 /* CAPlayThroughHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CAPlayThroughHost.swift; sourceTree = "<group>"; };
+		DA9A542F223819AC0052BA78 /* CAPlayThrough+Setup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CAPlayThrough+Setup.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -78,6 +82,8 @@
 				DA07D77C1C4B3BE6002333F5 /* BufferManager.swift */,
 				DA79DE9F1C34965200B6ED9A /* CABitOperations.swift */,
 				DA79DE9B1C34690B00B6ED9A /* CAPlayThrough.swift */,
+				DA9A542D222B173F0052BA78 /* CAPlayThroughHost.swift */,
+				DA9A542F223819AC0052BA78 /* CAPlayThrough+Setup.swift */,
 				DA79DE9D1C346FEB00B6ED9A /* CARingBuffer.swift */,
 				DA79DE971C34328A00B6ED9A /* CheckErr.swift */,
 				DA07D7801C4DE0E7002333F5 /* DCRejectionFilter.swift */,
@@ -99,6 +105,7 @@
 			buildConfigurationList = DA79DE921C3339DC00B6ED9A /* Build configuration list for PBXNativeTarget "CAPlayThroughSwift" */;
 			buildPhases = (
 				DA79DE811C3339DC00B6ED9A /* Sources */,
+				DA9A542C222B08250052BA78 /* Swiftlint */,
 				DA79DE821C3339DC00B6ED9A /* Frameworks */,
 				DA79DE831C3339DC00B6ED9A /* Resources */,
 			);
@@ -157,12 +164,34 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		DA9A542C222B08250052BA78 /* Swiftlint */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = Swiftlint;
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/bash;
+			shellScript = "if which swiftlint >/dev/null; then\n  swiftlint\nelse\n  echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		DA79DE811C3339DC00B6ED9A /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				DA79DE981C34328A00B6ED9A /* CheckErr.swift in Sources */,
+				DA9A5430223819AC0052BA78 /* CAPlayThrough+Setup.swift in Sources */,
 				DA07D7811C4DE0E7002333F5 /* DCRejectionFilter.swift in Sources */,
 				DA07D77F1C4B4DCD002333F5 /* FFTView.swift in Sources */,
 				DA79DE961C342F0E00B6ED9A /* AudioDeviceList.swift in Sources */,
@@ -173,6 +202,7 @@
 				DABFCAF61C39E52500C82F20 /* CAPlayThrough.swift in Sources */,
 				DA79DEA01C34965200B6ED9A /* CABitOperations.swift in Sources */,
 				DA79DE9E1C346FEB00B6ED9A /* CARingBuffer.swift in Sources */,
+				DA9A542E222B173F0052BA78 /* CAPlayThroughHost.swift in Sources */,
 				DA79DE891C3339DC00B6ED9A /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
