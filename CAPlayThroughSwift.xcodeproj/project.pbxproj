@@ -22,6 +22,7 @@
 		DA8521BA1C5412B30035477E /* MathFunctions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA8521B91C5412B30035477E /* MathFunctions.swift */; };
 		DA9A542E222B173F0052BA78 /* CAPlayThroughHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA9A542D222B173F0052BA78 /* CAPlayThroughHost.swift */; };
 		DA9A5430223819AC0052BA78 /* CAPlayThrough+Setup.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA9A542F223819AC0052BA78 /* CAPlayThrough+Setup.swift */; };
+		DA9A5434223828480052BA78 /* Atomic.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA9A5433223828480052BA78 /* Atomic.swift */; };
 		DABFCAF61C39E52500C82F20 /* CAPlayThrough.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA79DE9B1C34690B00B6ED9A /* CAPlayThrough.swift */; };
 /* End PBXBuildFile section */
 
@@ -44,6 +45,7 @@
 		DA8521B91C5412B30035477E /* MathFunctions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MathFunctions.swift; sourceTree = "<group>"; };
 		DA9A542D222B173F0052BA78 /* CAPlayThroughHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CAPlayThroughHost.swift; sourceTree = "<group>"; };
 		DA9A542F223819AC0052BA78 /* CAPlayThrough+Setup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CAPlayThrough+Setup.swift"; sourceTree = "<group>"; };
+		DA9A5433223828480052BA78 /* Atomic.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Atomic.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -77,6 +79,7 @@
 			isa = PBXGroup;
 			children = (
 				DA79DE881C3339DC00B6ED9A /* AppDelegate.swift */,
+				DA9A5433223828480052BA78 /* Atomic.swift */,
 				DA79DE951C342F0E00B6ED9A /* AudioDeviceList.swift */,
 				DA79DE991C343E9D00B6ED9A /* AudioDevice.swift */,
 				DA07D77C1C4B3BE6002333F5 /* BufferManager.swift */,
@@ -194,6 +197,7 @@
 				DA9A5430223819AC0052BA78 /* CAPlayThrough+Setup.swift in Sources */,
 				DA07D7811C4DE0E7002333F5 /* DCRejectionFilter.swift in Sources */,
 				DA07D77F1C4B4DCD002333F5 /* FFTView.swift in Sources */,
+				DA9A5434223828480052BA78 /* Atomic.swift in Sources */,
 				DA79DE961C342F0E00B6ED9A /* AudioDeviceList.swift in Sources */,
 				DA07D77B1C4B1705002333F5 /* FFTHelper.swift in Sources */,
 				DA8521BA1C5412B30035477E /* MathFunctions.swift in Sources */,

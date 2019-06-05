@@ -46,7 +46,7 @@ class CAPlayThrough {
   var outputUnit: AudioUnit?
 
   // Buffer sample info
-  var firstInputTime: Float64 = -1
+  var firstInputTime = Atomic<Float64>(-1)
   var firstOutputTime: Float64 = -1
   var inToOutSampleOffset: Float64 = 0
 
@@ -58,7 +58,7 @@ class CAPlayThrough {
     var outTS = AudioTimeStamp()
     let abl = UnsafeMutableAudioBufferListPointer(ioData)
 
-    if this.firstInputTime < 0 {
+    if this.firstInputTime.get() < 0 {
       // input hasn't run yet -> silence
       makeBufferSilent (abl!)
       return noErr
@@ -86,7 +86,7 @@ class CAPlayThrough {
     // get Delta between the devices and add it to the offset
     if this.firstOutputTime < 0 {
       this.firstOutputTime = inTimeStamp.pointee.mSampleTime
-      let delta = (this.firstInputTime - this.firstOutputTime)
+      let delta = (this.firstInputTime.get() - this.firstOutputTime)
       this.computeThruOffset()
       // changed: 3865519 11/10/04
       if delta < 0.0 {
@@ -117,8 +117,8 @@ class CAPlayThrough {
     ioData) -> OSStatus in
 
     let this = Unmanaged<CAPlayThrough>.fromOpaque(inRefCon).takeUnretainedValue()
-    if this.firstInputTime < 0 {
-      this.firstInputTime = inTimeStamp.pointee.mSampleTime
+    if this.firstInputTime.get() < 0 {
+      this.firstInputTime.set(inTimeStamp.pointee.mSampleTime)
     }
 
     // Get the new audio data
@@ -199,7 +199,7 @@ class CAPlayThrough {
     }
 
     // reset sample times
-    firstInputTime = -1
+    firstInputTime.set(-1)
     firstOutputTime = -1
     return noErr
   }
@@ -215,7 +215,7 @@ class CAPlayThrough {
     if let err = checkErr(AUGraphStop(graph!)) {
       return err
     }
-    firstInputTime = -1
+    firstInputTime.set(-1)
     firstOutputTime = -1
     return noErr
   }

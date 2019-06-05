@@ -91,7 +91,7 @@ class CARingBuffer {
 	var capacityBytes: UInt32 = 0
 
 	var timeBoundsQueue: [TimeBounds] = []; // kGeneralRingTimeBoundsQueueSize
-	var timeBoundsQueuePtr: Int32 = 0
+	var timeBoundsQueuePtr = Atomic<Int32>(0)
 
 	func allocate(_ nChannels: Int, bytesPerFrame: UInt32, capacityFrames: UInt32) {
 		self.bytesPerFrame = bytesPerFrame
@@ -101,7 +101,7 @@ class CARingBuffer {
 		self.buffers = (1...nChannels).map({ _ in [UInt8](repeating: 0, count: Int(self.capacityBytes))})
 		self.timeBoundsQueue = (1...kGeneralRingTimeBoundsQueueSize).map({ _ in
 			TimeBounds(0, 0, 0)})
-		self.timeBoundsQueuePtr = 0
+		self.timeBoundsQueuePtr.set(0)
 	}
 
 	func deallocate() {
@@ -111,11 +111,11 @@ class CARingBuffer {
 	}
 
 	func startTime() -> SampleTime {
-		return self.timeBoundsQueue[Int(self.timeBoundsQueuePtr & kGeneralRingTimeBoundsQueueMask)].startTime
+		return self.timeBoundsQueue[Int(self.timeBoundsQueuePtr.get() & kGeneralRingTimeBoundsQueueMask)].startTime
 	}
 
 	func endTime() -> SampleTime {
-		return self.timeBoundsQueue[Int(self.timeBoundsQueuePtr & kGeneralRingTimeBoundsQueueMask)].endTime
+		return self.timeBoundsQueue[Int(self.timeBoundsQueuePtr.get() & kGeneralRingTimeBoundsQueueMask)].endTime
 	}
 
 	func frameOffset(_ frameNumber: SampleTime) -> Int {
@@ -123,16 +123,15 @@ class CARingBuffer {
 	}
 
 	func setTimeBounds(_ startTime: SampleTime, _ endTime: SampleTime) {
-		let nextPtr = self.timeBoundsQueuePtr + 1
+    let queuePtr = self.timeBoundsQueuePtr.get()
+		let nextPtr = queuePtr + 1
 		let index = Int(nextPtr & kGeneralRingTimeBoundsQueueMask)
 
 		self.timeBoundsQueue[index].startTime = startTime
 		self.timeBoundsQueue[index].endTime = endTime
 		self.timeBoundsQueue[index].updateCounter = nextPtr
 
-		withUnsafeMutablePointer(to: &timeBoundsQueuePtr) { (ptr: UnsafeMutablePointer<Int32>) -> Void in
-			OSAtomicCompareAndSwap32Barrier(Int32(self.timeBoundsQueuePtr), Int32(self.timeBoundsQueuePtr + 1), ptr)
-		}
+    timeBoundsQueuePtr.compareAndSwap(queuePtr, nextPtr)
 	}
 
   func store(_ abl: UnsafeMutableAudioBufferListPointer, framesToWrite: UInt32,
@@ -196,7 +195,7 @@ class CARingBuffer {
 	@discardableResult
 	func getTimeBounds(startTime: inout SampleTime, endTime: inout SampleTime) -> CARingBufferError {
 		for _ in 0...8 {
-			let curPtr = self.timeBoundsQueuePtr
+			let curPtr = self.timeBoundsQueuePtr.get()
 			let index = curPtr & kGeneralRingTimeBoundsQueueMask
 			let bounds = self.timeBoundsQueue[Int(index)]
 			startTime = bounds.startTime
